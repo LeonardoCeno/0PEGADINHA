@@ -34,7 +34,11 @@
             <li v-for="cat in categorias" :key="cat.id">
                 <div class="separador" >
                 <img v-if="cat.image_path" :src="cat.image_path.startsWith('http') ? cat.image_path : apiBase + cat.image_path" alt="Imagem da categoria" style="width:50px;height:50px;vertical-align:middle;margin-right:8px;"/>
-                <b>{{ cat.name }}</b> </div> - {{ cat.description }}
+                <div class="categoria-info">
+                    <b>{{ cat.name }}</b>
+                    <span class="produtos-count">({{ cat.produtosCount || 0 }} produtos)</span>
+                </div>
+                </div> - {{ cat.description }}
                 <div class="BTli" >
                 <button @click="editarCategoria(cat)">Editar</button>
                 <button class="excluir-btn" @click="excluirCategoria(cat.id)">Excluir</button>
@@ -118,10 +122,30 @@ async function carregarCategorias() {
     erroCategorias.value = ''
     try {
         const { data } = await api.get('/categories/user/228')
-        categorias.value = data.map(cat => ({
-            ...cat,
-            image_path: cat.image_path ? (cat.image_path.startsWith('http') ? cat.image_path : apiBase + cat.image_path) : ''
-        }))
+        
+        // Para cada categoria, buscar o número de produtos
+        const categoriasComProdutos = await Promise.all(
+            data.map(async (cat) => {
+                try {
+                    const produtosResponse = await api.get(`/products/category/${cat.id}`)
+                    const produtosCount = produtosResponse.data.length
+                    return {
+                        ...cat,
+                        image_path: cat.image_path ? (cat.image_path.startsWith('http') ? cat.image_path : apiBase + cat.image_path) : '',
+                        produtosCount: produtosCount
+                    }
+                } catch (error) {
+                    console.error(`Erro ao buscar produtos da categoria ${cat.id}:`, error)
+                    return {
+                        ...cat,
+                        image_path: cat.image_path ? (cat.image_path.startsWith('http') ? cat.image_path : apiBase + cat.image_path) : '',
+                        produtosCount: 0
+                    }
+                }
+            })
+        )
+        
+        categorias.value = categoriasComProdutos
     } catch (e) {
         erroCategorias.value = 'Erro ao carregar categorias.'
     } finally {
@@ -216,6 +240,18 @@ function abrirCriacao() {
     padding: 50px 0px 0px 70px;
 }
 
+@media (max-width: 768px) {
+    .tudo {
+        padding: 20px 15px 0px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tudo {
+        padding: 15px 10px 0px 10px;
+    }
+}
+
 .nova-categoria-btn {
     padding: 10px 20px;
     font-size: 1.2rem;
@@ -225,6 +261,20 @@ function abrirCriacao() {
     border-radius: 5px;
     cursor: pointer;
     align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+    .nova-categoria-btn {
+        padding: 8px 16px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nova-categoria-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
 }
 
 .nova-categoria-btn:hover {
@@ -254,10 +304,40 @@ function abrirCriacao() {
     text-align: center;
 }
 
+@media (max-width: 768px) {
+    .criacao-form {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .criacao-form {
+        width: 98%;
+        padding: 15px;
+        margin: 5px;
+    }
+}
+
 .criacao-form h2 {
     font-size: 2.5rem;
     font-family: helvetica;
     margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .criacao-form h2 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .criacao-form h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
 }
 
 .criacao-form label {
@@ -288,6 +368,21 @@ function abrirCriacao() {
     font-size: 1.1rem;
 }
 
+@media (max-width: 768px) {
+    .criacao-form button {
+        padding: 8px 16px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .criacao-form button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+}
+
 .criacao-form button:hover {
     background-color: #45a049;
 }
@@ -316,9 +411,28 @@ function abrirCriacao() {
     height: 30%;
 }
 
+@media (max-width: 768px) {
+    .categorias {
+        width: 100%;
+        height: auto;
+    }
+}
+
 .botoes h3 {
     font-size: 2.5rem;
     font-family: helvetica;
+}
+
+@media (max-width: 768px) {
+    .botoes h3 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .botoes h3 {
+        font-size: 1.5rem;
+    }
 }
 
 .categorias ul {
@@ -336,6 +450,23 @@ function abrirCriacao() {
     justify-content: space-between;
     font-size: 1.1rem;
     border: 1px solid #a9b5b6;
+}
+
+@media (max-width: 768px) {
+    .categorias li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .categorias li {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
 }
 
 .categorias li img {
@@ -359,8 +490,20 @@ function abrirCriacao() {
     margin-left: 10px;
 }
 
-.categorias li button:hover {
-    background-color: #5a6268;
+@media (max-width: 768px) {
+    .categorias li button {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .categorias li button {
+        padding: 3px 6px;
+        font-size: 0.75rem;
+        margin-left: 3px;
+    }
 }
 
 .categorias li .edit-button {
@@ -390,10 +533,37 @@ function abrirCriacao() {
     gap: 5vw;
 }
 
+@media (max-width: 768px) {
+    .BTli {
+        gap: 10px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .BTli {
+        gap: 5px;
+    }
+}
+
 .separador {
     display: flex;
     align-items: center;
     gap: 4vw;
+}
+
+@media (max-width: 768px) {
+    .separador {
+        gap: 10px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .separador {
+        gap: 8px;
+    }
 }
 
 .excluir-btn {
@@ -410,6 +580,56 @@ function abrirCriacao() {
     justify-content: space-between;
     margin-bottom: 25px;
     border-bottom: 1px solid rgb(134, 134, 134);
+}
+
+@media (max-width: 768px) {
+    .botoes {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .botoes {
+        gap: 10px;
+    }
+}
+
+.categoria-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .categoria-info {
+        gap: 6px;
+    }
+}
+
+.produtos-count {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: normal;
+    background-color: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+    .produtos-count {
+        font-size: 0.8rem;
+        padding: 1px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .produtos-count {
+        font-size: 0.75rem;
+        padding: 1px 4px;
+    }
 }
 
 </style>

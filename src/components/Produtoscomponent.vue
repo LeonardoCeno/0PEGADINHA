@@ -344,6 +344,7 @@ function alternarOfertas() {
     height: auto;
     display: block;
     margin: 0 auto;
+    transform: translateY(-3px);
 }
 
 .disponivel-selo {

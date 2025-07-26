@@ -1,5 +1,14 @@
 <template>
     <div class="fixador" >
+    <!-- Nova barrinha no topo -->
+    <div class="top-bar">
+        <div class="top-bar-links">
+            <router-link to="/" class="top-link">Home</router-link>
+            <router-link to="/favoritos" class="top-link">Favoritos</router-link>
+            <router-link to="/pedidos" class="top-link">Meus Pedidos</router-link>
+        </div>
+    </div>
+    
     <header>
         <a class="logo desktop" href="/">
         <img src="../components/img/agrsimtabao-Photoroom.png" alt="" />
@@ -269,15 +278,48 @@ function pesquisarEnter() {
 
 <style scoped>
 
+.top-bar {
+    background: #02060af5;
+    padding: 8px 0;
+    border-bottom: 1px solid #333333;
+}
+
+.top-bar-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.top-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    font-family: helvetica;
+}
+
+.top-link:hover {
+    color: #079ac7;
+}
+
+.top-link.router-link-active {
+    color: #079ac7;
+    font-weight: 600;
+}
+
 header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.658);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     min-height: 12vh;
     gap: 6vw;
     flex-wrap: wrap;
-    padding: 10px;
+    padding: 15px 20px;
 }
 
 .logo {
@@ -291,7 +333,7 @@ header {
 .logo img {
     width: auto;
     height: 95px;
-    filter: brightness(20%);
+    filter: brightness(15%);
     transform: rotate(-9deg);
 }
 
@@ -305,13 +347,18 @@ header {
     align-items: center;
     justify-content: space-between;
     background-color: #ffffff;
-    border-radius: 10px;
-    padding: 0 15px;
+    border-radius: 15px;
+    padding: 0 20px;
     width: 41vw;
     max-width: 720px;
-    height: 45px;
+    height: 50px;
     flex-shrink: 1;
-    border: 1px solid #000000;
+    border: 1px solid #6d6d6d;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.input:focus-within {
+    border: 1.8px solid #03040cf5;
 }
 
 .input img {
@@ -327,12 +374,14 @@ input {
     background-color: transparent;
     min-width: 100px;
     font-size: 16px;
-    color: #333;
+    color: #2c3e50;
+    font-weight: 500;
 }
 
 input::placeholder {
-    color: #888;
+    color: #95a5a6;
     font-style: italic;
+    font-weight: 400;
 }
 
 .botoes {
@@ -452,6 +501,128 @@ button:hover img {
     }
 }
 
+/* Responsividade para tablets pequenos (600px - 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
+    .topo-mobile .logo img {
+        height: 50px;
+    }
+    
+    .botoes {
+        gap: 15px;
+    }
+    
+    button p {
+        font-size: 13px;
+    }
+    
+    .input {
+        width: 85vw;
+    }
+}
+
+/* Responsividade para celulares grandes (480px - 599px) */
+@media (min-width: 480px) and (max-width: 599px) {
+    .topo-mobile .logo {
+        display: none; /* Oculta a logo em telas pequenas */
+    }
+    
+    .topo-mobile {
+        justify-content: center;
+    }
+    
+    .botoes {
+        gap: 12px;
+    }
+    
+    button p {
+        font-size: 12px;
+    }
+    
+    button img {
+        height: 3.5vh;
+    }
+    
+    .input {
+        width: 88vw;
+    }
+    
+    input {
+        width: 70vw;
+    }
+}
+
+/* Responsividade para celulares pequenos (320px - 479px) */
+@media (min-width: 320px) and (max-width: 479px) {
+    .topo-mobile .logo {
+        display: none; /* Oculta a logo em telas pequenas */
+    }
+    
+    .topo-mobile {
+        justify-content: center;
+    }
+    
+    .botoes {
+        gap: 8px;
+    }
+    
+    button p {
+        font-size: 11px;
+    }
+    
+    button img {
+        height: 3vh;
+    }
+    
+    .input {
+        width: 92vw;
+    }
+    
+    input {
+        width: 65vw;
+    }
+    
+    header {
+        gap: 10px;
+        padding: 8px;
+    }
+}
+
+/* Responsividade para celulares muito pequenos (< 320px) */
+@media (max-width: 319px) {
+    .topo-mobile .logo {
+        display: none; /* Oculta a logo em telas pequenas */
+    }
+    
+    .topo-mobile {
+        justify-content: center;
+    }
+    
+    .botoes {
+        gap: 5px;
+    }
+    
+    button p {
+        font-size: 10px;
+    }
+    
+    button img {
+        height: 2.5vh;
+    }
+    
+    .input {
+        width: 95vw;
+    }
+    
+    input {
+        width: 60vw;
+    }
+    
+    header {
+        gap: 8px;
+        padding: 5px;
+    }
+}
+
 .Categorias {
     display: flex;
     justify-content: center;
@@ -480,10 +651,12 @@ button:hover img {
     color: white;
     height: 55px;
     font-weight: bold;
+    background: transparent;
 }
 
 .Categorias button:hover {
     color: #63b3ed;
+    background: transparent;
 }
 
 .Categorias button:hover img {
@@ -626,17 +799,203 @@ button:hover img {
     }
 }
 
+@media (max-width: 768px) {
+    .Categorias {
+        gap: 40px;
+        padding: 0 10px;
+    }
+    
+    .Categorias button {
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+    
+    .Categorias img {
+        width: 10px;
+        min-width: 10px;
+    }
+}
+
 @media (max-width: 550px) {
     .Categorias button:nth-child(6) {
         display: none;
     }
     .Categorias {
-        gap: 40px;
+        gap: 30px;
+        padding: 0 5px;
     }
-    .botoes {
-        gap: 10px;
+    
+    .Categorias button {
+        padding: 3px 6px;
+        font-size: 12px;
+    }
+    
+    .Categorias img {
+        width: 8px;
+        min-width: 8px;
     }
 }
 
+@media (max-width: 480px) {
+    .Categorias {
+        gap: 20px;
+        padding: 0 3px;
+    }
+    
+    .Categorias button {
+        padding: 2px 4px;
+        font-size: 11px;
+    }
+    
+    .Categorias img {
+        width: 6px;
+        min-width: 6px;
+    }
+}
+
+@media (max-width: 320px) {
+    .Categorias {
+        gap: 15px;
+        padding: 0 2px;
+    }
+    
+    .Categorias button {
+        padding: 1px 3px;
+        font-size: 10px;
+    }
+    
+    .Categorias img {
+        width: 5px;
+        min-width: 5px;
+    }
+}
+
+@media (max-width: 550px) {
+    .top-bar-links {
+        gap: 20px;
+        padding: 0 15px;
+    }
+    
+    .top-link {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-bar-links {
+        gap: 25px;
+    }
+    
+    .top-link {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-bar-links {
+        gap: 15px;
+        padding: 0 10px;
+    }
+    
+    .top-link {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 320px) {
+    .top-bar-links {
+        gap: 10px;
+        padding: 0 5px;
+    }
+    
+    .top-link {
+        font-size: 11px;
+    }
+}
+
+/* Responsividade para TVs grandes (1200px+) */
+@media (min-width: 1200px) {
+    header {
+        gap: 8vw;
+        padding: 15px 30px;
+    }
+    
+    .input {
+        width: 35vw;
+        max-width: 800px;
+    }
+    
+    .logo img {
+        height: 110px;
+    }
+    
+    .botoes {
+        gap: 15px;
+    }
+    
+    .botoes p {
+        font-size: 18px;
+    }
+    
+    .botoes img {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Responsividade para monitores médios (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    header {
+        gap: 7vw;
+        padding: 12px 25px;
+    }
+    
+    .input {
+        width: 38vw;
+        max-width: 750px;
+    }
+    
+    .logo img {
+        height: 100px;
+    }
+    
+    .botoes {
+        gap: 12px;
+    }
+    
+    .botoes p {
+        font-size: 17px;
+    }
+}
+
+/* Responsividade para tablets grandes (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    header {
+        gap: 6vw;
+        padding: 10px 20px;
+    }
+    
+    .input {
+        width: 42vw;
+        max-width: 650px;
+    }
+    
+    .logo img {
+        height: 85px;
+    }
+    
+    .botoes {
+        gap: 10px;
+    }
+    
+    .botoes p {
+        font-size: 16px;
+    }
+    
+    .botoes img {
+        width: 22px;
+        height: 22px;
+    }
+}
 
 </style>

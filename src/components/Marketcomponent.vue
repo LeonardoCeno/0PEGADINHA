@@ -84,9 +84,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import banner1 from './img/CHEGA.png'
-import banner2 from './img/perfect.png'
-import banner3 from './img/LIVRO.png'
+import banner1 from './img/bannervariante.png'
+import banner2 from './img/bannerprincipal2.jpg'
+import banner3 from './img/bannerprincipal3.png'
 import Pracima from './pracima.vue'
 
 const banners = [banner1, banner2, banner3]
@@ -169,7 +169,7 @@ onUnmounted(() => {
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    background-color: rgba(240, 240, 240, 0.377);
+    background-color: rgba(240, 240, 240, 0.226);
     height: 45vh;
     min-height: 300px;
     width: 100%;
@@ -227,6 +227,7 @@ onUnmounted(() => {
     height: 90%;
     object-position: center;
     background-size: cover;
+    transform: translateY(-3px);
 }
 
 .nav {

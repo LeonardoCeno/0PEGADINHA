@@ -298,9 +298,28 @@ async function carregarProdutos() {
     padding: 50px 0px 0px 70px;
 }
 
+@media (max-width: 768px) {
+    .tudo {
+        padding: 20px 15px 0px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tudo {
+        padding: 15px 10px 0px 10px;
+    }
+}
+
 .produtos {
   width: 95%;
   height: 30%;
+}
+
+@media (max-width: 768px) {
+  .produtos {
+    width: 100%;
+    height: auto;
+  }
 }
 
 .novo-produto-btn {
@@ -312,6 +331,20 @@ async function carregarProdutos() {
   border-radius: 5px;
   cursor: pointer;
   align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+  .novo-produto-btn {
+    padding: 8px 16px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .novo-produto-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
 }
 
 .novo-produto-btn:hover {
@@ -347,10 +380,40 @@ async function carregarProdutos() {
   justify-content: flex-start;
 }
 
+@media (max-width: 768px) {
+  .criacao-form {
+    width: 95%;
+    padding: 20px;
+    margin: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .criacao-form {
+    width: 98%;
+    padding: 15px;
+    margin: 5px;
+  }
+}
+
 .criacao-form h2 {
   font-size: 2.5rem;
   font-family: helvetica;
   margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .criacao-form h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .criacao-form h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
 }
 
 .criacao-form label {
@@ -358,6 +421,20 @@ async function carregarProdutos() {
   margin-bottom: 10px;
   font-size: 1.1rem;
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .criacao-form label {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .criacao-form label {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
 }
 
 .criacao-form input[type="text"],
@@ -373,6 +450,30 @@ async function carregarProdutos() {
   font-size: 1rem;
 }
 
+@media (max-width: 768px) {
+  .criacao-form input[type="text"],
+  .criacao-form textarea,
+  .criacao-form input[type="file"],
+  .criacao-form input[type="number"],
+  .criacao-form select {
+    padding: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .criacao-form input[type="text"],
+  .criacao-form textarea,
+  .criacao-form input[type="file"],
+  .criacao-form input[type="number"],
+  .criacao-form select {
+    padding: 6px;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+  }
+}
+
 .criacao-form button {
   background-color: #4CAF50;
   color: white;
@@ -382,6 +483,21 @@ async function carregarProdutos() {
   cursor: pointer;
   font-size: 1.1rem;
   margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+  .criacao-form button {
+    padding: 8px 16px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .criacao-form button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
 }
 
 .criacao-form button:last-child {
@@ -411,9 +527,35 @@ async function carregarProdutos() {
   border-bottom: 1px solid rgb(167, 167, 167);
 }
 
+@media (max-width: 768px) {
+  .produtos-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .produtos-header {
+    gap: 10px;
+  }
+}
+
 .produtos-header h3 {
   font-size: 2.5rem;
   font-family: helvetica;
+}
+
+@media (max-width: 768px) {
+  .produtos-header h3 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .produtos-header h3 {
+    font-size: 1.5rem;
+  }
 }
 
 ul {
@@ -477,16 +619,49 @@ li {
   gap: 16px;
 }
 
+@media (max-width: 768px) {
+  .linha-dupla {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .linha-dupla {
+    gap: 8px;
+  }
+}
+
 .campo-metade {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+@media (max-width: 768px) {
+  .campo-metade {
+    flex: none;
+  }
+}
+
 .filtro-categorias {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .filtro-categorias {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtro-categorias {
+    gap: 4px;
+  }
 }
 
 .filtro-categorias select {
@@ -496,10 +671,30 @@ li {
   font-size: 1rem;
 }
 
+@media (max-width: 768px) {
+  .filtro-categorias select {
+    padding: 4px 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtro-categorias select {
+    padding: 3px 6px;
+    font-size: 0.8rem;
+  }
+}
+
 .nome-preco-imagem {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+@media (max-width: 768px) {
+  .nome-preco-imagem {
+    gap: 8px;
+  }
 }
 
 .nome-preco-imagem p {
@@ -508,12 +703,38 @@ li {
   font-weight: bold;
 }
 
+@media (max-width: 768px) {
+  .nome-preco-imagem p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nome-preco-imagem p {
+    font-size: 16px;
+  }
+}
+
 .nome-preco-imagem img {
   margin-top: 10px;
   height: 225px;
   width: 160px;
   border: 0.1px solid rgb(212, 212, 212);
   filter: contrast(100%);
+}
+
+@media (max-width: 768px) {
+  .nome-preco-imagem img {
+    height: 180px;
+    width: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nome-preco-imagem img {
+    height: 150px;
+    width: 110px;
+  }
 }
 
 .produto {
@@ -528,13 +749,21 @@ li {
   padding-right: 10px;
 }
 
-.produto:hover .add {
-  opacity: 1;
-  pointer-events: auto;
+@media (max-width: 768px) {
+  .produto {
+    width: 200px;
+    height: auto;
+    margin-top: 2vh;
+    padding: 8px;
+  }
 }
 
-.produto:hover {
-  background-color: rgb(209, 209, 209);
+@media (max-width: 480px) {
+  .produto {
+    width: 180px;
+    margin-top: 1vh;
+    padding: 6px;
+  }
 }
 
 .produto h4 {
@@ -543,6 +772,20 @@ li {
   color: rgb(65, 65, 65);
   margin-top: 10px;
   height: 40px;
+}
+
+@media (max-width: 768px) {
+  .produto h4 {
+    font-size: 14px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .produto h4 {
+    font-size: 13px;
+    height: 30px;
+  }
 }
 
 .lista {
@@ -571,6 +814,34 @@ li {
 @media (max-width: 550px) {
   .lista {
     grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .BTli {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .BTli {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .BTli button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .BTli button {
+    padding: 3px 6px;
+    font-size: 0.75rem;
+    margin-left: 3px;
   }
 }
 
