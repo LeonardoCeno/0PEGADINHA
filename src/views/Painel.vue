@@ -64,6 +64,8 @@ onMounted(async () => {
     width: 100%;
     height: 100vh;
     padding: 20px;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .menuesquerdo{
@@ -75,6 +77,7 @@ onMounted(async () => {
     min-width: 266px;
     z-index: 10;
     border-radius: 12px 0 0 12px;
+    flex-shrink: 0;
 }
 
 .menuesquerdo h2 {
@@ -121,10 +124,67 @@ onMounted(async () => {
     height: 100%;
     background-color: #ffffff;
     border: 1px solid black;
+    overflow-x: hidden;
+    min-width: 0;
+    flex: 1;
 }
 
 .admin button{
     color: #00b7ff;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .Tudo {
+        flex-direction: row;
+        height: 100vh;
+        padding: 10px;
+    }
+    
+    .menuesquerdo {
+        width: 25%;
+        max-width: 200px;
+        min-width: 180px;
+        height: 100%;
+        border-radius: 12px 0 0 12px;
+        margin-bottom: 0;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    
+    .menudireito {
+        width: 75%;
+        height: 100%;
+        min-height: auto;
+    }
+    
+    .menuesquerdo button {
+        height: 50px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .Tudo {
+        padding: 5px;
+    }
+    
+    .menuesquerdo {
+        width: 30%;
+        max-width: 150px;
+        min-width: 140px;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    
+    .menudireito {
+        width: 70%;
+    }
+    
+    .menuesquerdo button {
+        height: 45px;
+        font-size: 0.8rem;
+    }
 }
 
 </style>

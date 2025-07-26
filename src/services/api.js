@@ -79,6 +79,12 @@ export async function getCategoriasPorUsuario228() {
   return response.data
 }
 
+// moderadores
+export async function criarModerador(dados) {
+  const response = await api.post('/users/create-moderator', dados)
+  return response.data
+}
+
 const token = localStorage.getItem('token')
 if (token) {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`

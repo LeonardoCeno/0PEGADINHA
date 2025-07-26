@@ -1,28 +1,53 @@
 <template>
     <div class="tudo">
-        <div class="container-central">
-            <div class="titulo-bar">
+        <div class="conteudo">
+            <div class="barra-do-titulo">
                 <div class="titulo">
-                    <h1>Endereços</h1>
+                    <h1>Meus Endereços</h1>
+                    <p class="subtitulo">Gerencie seus endereços de entrega</p>
                 </div>
-                <button class="btn-novo-endereco" @click="mostrarModal = true">Novo Endereço</button>
+                <button class="btn-novo-endereco" @click="mostrarModal = true">
+                    <span>+</span>
+                    Novo Endereço
+                </button>
             </div>
 
             <!-- Modal de novo endereço -->
             <div v-if="mostrarModal" class="modal-overlay" @click.self="mostrarModal = false">
                 <div class="modal-form">
-                    <h2>Novo Endereço</h2>
+                    <div class="modal-header">
+                        <h2>Novo Endereço</h2>
+                        <button class="btn-fechar" @click="mostrarModal = false">&times;</button>
+                    </div>
                     <form class="form-endereco" @submit.prevent="adicionarEndereco">
                         <div class="campos-form">
-                            <input v-model="novoEndereco.street" type="text" placeholder="Rua" required />
-                            <input v-model="novoEndereco.number" type="number" placeholder="Número" required />
-                            <input v-model="novoEndereco.zip" type="text" placeholder="CEP" required />
-                            <input v-model="novoEndereco.city" type="text" placeholder="Cidade" required />
-                            <input v-model="novoEndereco.state" type="text" placeholder="Estado" required />
-                            <input v-model="novoEndereco.country" type="text" placeholder="País" required />
+                            <div class="campo">
+                                <label for="rua">Rua *</label>
+                                <input v-model="novoEndereco.street" type="text" id="rua" placeholder="Nome da rua" required />
+                            </div>
+                            <div class="campo">
+                                <label for="numero">Número *</label>
+                                <input v-model="novoEndereco.number" type="number" id="numero" placeholder="123" required />
+                            </div>
+                            <div class="campo">
+                                <label for="cep">CEP *</label>
+                                <input v-model="novoEndereco.zip" type="text" id="cep" placeholder="00000-000" required />
+                            </div>
+                            <div class="campo">
+                                <label for="cidade">Cidade *</label>
+                                <input v-model="novoEndereco.city" type="text" id="cidade" placeholder="Nome da cidade" required />
+                            </div>
+                            <div class="campo">
+                                <label for="estado">Estado *</label>
+                                <input v-model="novoEndereco.state" type="text" id="estado" placeholder="Seu Estado" required />
+                            </div>
+                            <div class="campo">
+                                <label for="pais">País *</label>
+                                <input v-model="novoEndereco.country" type="text" id="pais" placeholder="Brasil" required />
+                            </div>
                         </div>
                         <div class="botoes-modal">
-                            <button type="submit">Salvar</button>
+                            <button type="submit" class="btn-salvar">Salvar Endereço</button>
                             <button type="button" class="btn-cancelar" @click="mostrarModal = false">Cancelar</button>
                         </div>
                     </form>
@@ -32,18 +57,39 @@
             <!-- Modal de edição de endereço -->
             <div v-if="modalEditar" class="modal-overlay" @click.self="fecharModalEditar">
                 <div class="modal-form">
-                    <h2>Editar Endereço</h2>
+                    <div class="modal-header">
+                        <h2>Editar Endereço</h2>
+                        <button class="btn-fechar" @click="fecharModalEditar">&times;</button>
+                    </div>
                     <form class="form-endereco" @submit.prevent="salvarEdicaoEndereco">
                         <div class="campos-form">
-                            <input v-model="enderecoEditando.street" type="text" placeholder="Rua" required />
-                            <input v-model="enderecoEditando.number" type="number" placeholder="Número" required />
-                            <input v-model="enderecoEditando.zip" type="text" placeholder="CEP" required />
-                            <input v-model="enderecoEditando.city" type="text" placeholder="Cidade" required />
-                            <input v-model="enderecoEditando.state" type="text" placeholder="Estado" required />
-                            <input v-model="enderecoEditando.country" type="text" placeholder="País" required />
+                            <div class="campo">
+                                <label for="rua-edit">Rua *</label>
+                                <input v-model="enderecoEditando.street" type="text" id="rua-edit" placeholder="Nome da rua" required />
+                            </div>
+                            <div class="campo">
+                                <label for="numero-edit">Número *</label>
+                                <input v-model="enderecoEditando.number" type="number" id="numero-edit" placeholder="123" required />
+                            </div>
+                            <div class="campo">
+                                <label for="cep-edit">CEP *</label>
+                                <input v-model="enderecoEditando.zip" type="text" id="cep-edit" placeholder="00000-000" required />
+                            </div>
+                            <div class="campo">
+                                <label for="cidade-edit">Cidade *</label>
+                                <input v-model="enderecoEditando.city" type="text" id="cidade-edit" placeholder="Nome da cidade" required />
+                            </div>
+                            <div class="campo">
+                                <label for="estado-edit">Estado *</label>
+                                <input v-model="enderecoEditando.state" type="text" id="estado-edit" placeholder="Seu Estado" required />
+                            </div>
+                            <div class="campo">
+                                <label for="pais-edit">País *</label>
+                                <input v-model="enderecoEditando.country" type="text" id="pais-edit" placeholder="Brasil" required />
+                            </div>
                         </div>
                         <div class="botoes-modal">
-                            <button type="submit">Salvar</button>
+                            <button type="submit" class="btn-salvar">Salvar Alterações</button>
                             <button type="button" class="btn-cancelar" @click="fecharModalEditar">Cancelar</button>
                         </div>
                     </form>
@@ -51,21 +97,29 @@
             </div>
 
             <div class="enderecos-lista">
-                <div v-if="carregando" class="carregando">Carregando endereços...</div>
+                <div v-if="carregando" class="carregando">
+                    <div class="spinner"></div>
+                    <p>Carregando endereços...</p>
+                </div>
                 <div v-else-if="erro" class="erro">{{ erro }}</div>
                 <div v-else>
-                    <div v-if="enderecos.length === 0" class="nenhum-endereco">Nenhum endereço cadastrado.</div>
-                    <div v-else class="enderecos-grid alinhado-esquerda">
+                    <div v-if="enderecos.length === 0" class="nenhum-endereco">
+                        <div class="icone-vazio">📍</div>
+                        <h3>Nenhum endereço cadastrado</h3>
+                        <p>Adicione seu primeiro endereço para receber suas compras</p>
+                    </div>
+                    <div v-else class="enderecos-grid">
                         <div v-for="endereco in enderecos" :key="endereco.id" class="endereco-card">
-                            <div class="linha"><strong>Rua:</strong> {{ endereco.street }}</div>
-                            <div class="linha"><strong>Número:</strong> {{ endereco.number }}</div>
-                            <div class="linha"><strong>CEP:</strong> {{ endereco.zip }}</div>
-                            <div class="linha"><strong>Cidade:</strong> {{ endereco.city }}</div>
-                            <div class="linha"><strong>Estado:</strong> {{ endereco.state }}</div>
-                            <div class="linha"><strong>País:</strong> {{ endereco.country }}</div>
-                            <div class="acoes-endereco">
-                                <button class="btn-acao editar" @click="abrirModalEditar(endereco)">Editar</button>
-                                <button class="btn-acao excluir" @click="excluirEndereco(endereco.id)">Excluir</button>
+                            <div class="endereco-content">
+                                <div class="endereco-principal">
+                                    <h3>{{ endereco.street }}, {{ endereco.number }}</h3>
+                                    <p>{{ endereco.city }} - {{ endereco.state }}</p>
+                                    <span class="cep">{{ endereco.zip }}</span>
+                                </div>
+                                <div class="endereco-acoes">
+                                    <button class="btn-edit" @click="abrirModalEditar(endereco)">Editar</button>
+                                    <button class="btn-delete" @click="excluirEndereco(endereco.id)">Excluir</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,216 +209,439 @@ onMounted(carregarEnderecos)
 <style scoped>
 .tudo {
     width: 100%;
-    min-height: 100vh;
-    background-color: #ffffff;
-    padding-bottom: 40px;
+    height: 100%;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
-.container-central {
-    max-width: 1100px;
+.conteudo {
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0 32px;
+    padding: 0;
     box-sizing: border-box;
     width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
-.titulo-bar {
+.barra-do-titulo {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background-color: #ffffff;
-    height: 17vh;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 32px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
-.titulo {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: 1.5rem;
-    height: 100%;
+
+.titulo h1 {
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.subtitulo {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
 }
 
 .btn-novo-endereco {
-    background: #3a9c73;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #030a11f5;
     color: #fff;
     border: none;
-    border-radius: 6px;
-    padding: 10px 22px;
-    font-size: 1.1rem;
-    font-weight: bold;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-}
-.btn-novo-endereco:hover {
-    background: #287a56;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+.btn-novo-endereco:hover {
+    background-color: #02060ac2;
+    transform: translateY(-1px);
+}
+
+.btn-novo-endereco span {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Modal Styles */
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.25);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 20px;
 }
+
 .modal-form {
     background: #fff;
     border-radius: 16px;
-    box-shadow: 0 6px 32px rgba(0,0,0,0.15);
-    padding: 32px 28px 24px 28px;
-    min-width: 320px;
-    max-width: 370px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    padding: 0;
+    min-width: 400px;
+    max-width: 500px;
     width: 100%;
+    overflow: hidden;
+}
+
+.modal-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    animation: modalShow 0.2s;
+    justify-content: space-between;
+    padding: 24px 32px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
 }
-@keyframes modalShow {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.modal-form h2 {
-    margin-bottom: 18px;
-    color: #3a9c73;
-    font-size: 1.35rem;
+
+.modal-header h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.5rem;
     font-weight: 700;
 }
-.form-endereco {
+
+.btn-fechar {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    width: 100%;
-    gap: 0;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
 }
+
+.btn-fechar:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.form-endereco {
+    padding: 32px;
+}
+
 .campos-form {
     display: flex;
     flex-direction: column;
-    gap: 13px;
-    width: 100%;
-}
-.form-endereco input {
-    padding: 10px 12px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 7px;
-    font-size: 1rem;
-    background: #fafbfc;
-    transition: border 0.2s, box-shadow 0.2s;
-    outline: none;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-}
-.form-endereco input:focus {
-    border: 1.5px solid #3a9c73;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(58,156,115,0.08);
-}
-.botoes-modal {
-    display: flex;
-    gap: 10px;
-    margin-top: 18px;
-    width: 100%;
-    justify-content: flex-end;
-}
-.form-endereco button {
-    padding: 9px 22px;
-    background: #3a9c73;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-}
-.form-endereco button:hover {
-    background: #287a56;
-    box-shadow: 0 4px 16px rgba(58,156,115,0.13);
-}
-.btn-cancelar {
-    background: #c0392b !important;
-}
-.btn-cancelar:hover {
-    background: #a93226 !important;
+    gap: 20px;
+    margin-bottom: 24px;
 }
 
-.enderecos-lista {
+.campo {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    box-sizing: border-box;
+    gap: 8px;
 }
+
+.campo label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.campo input {
+    padding: 14px 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.campo input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.botoes-modal {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-salvar {
+    background-color: #030a11f5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-salvar:hover {
+    background-color: #02060ac2;
+}
+
+.btn-cancelar {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+    background-color: #5a6268;
+}
+
+/* Lista de Endereços */
+.enderecos-lista {
+    width: 100%;
+}
+
+.carregando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    color: #666;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #030a11f5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.erro {
+    background: #fee;
+    color: #c53030;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #feb2b2;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.nenhum-endereco {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 60px 20px;
+    text-align: center;
+    color: #666;
+}
+
+.icone-vazio {
+    font-size: 3rem;
+    opacity: 0.5;
+}
+
+.nenhum-endereco h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.nenhum-endereco p {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
 .enderecos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
-    width: 100%;
-    max-width: 900px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
     margin-top: 20px;
 }
-.alinhado-esquerda {
-    justify-items: start;
-}
+
 .endereco-card {
-    background: #f7f7f7;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    padding: 18px 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 1.08rem;
-    border-left: 5px solid #3a9c73;
-    position: relative;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 20px;
+    border: 1px solid #e1e5e9;
 }
-.acoes-endereco {
+
+.endereco-content {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
 }
-.btn-acao {
-    padding: 6px 16px;
+
+.endereco-principal h3 {
+    margin: 0 0 8px 0;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.endereco-principal p {
+    margin: 0 0 4px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.cep {
+    color: #999;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.endereco-acoes {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-edit, .btn-delete {
+    padding: 6px 12px;
     border: none;
-    border-radius: 5px;
-    font-size: 0.98rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.2s;
 }
-.btn-acao.editar {
-    background: #68655a;
-    color: #fff;
+
+.btn-edit {
+    background: #f8f9fa;
+    color: #495057;
 }
-.btn-acao.editar:hover {
-    background: #504e42;
+
+.btn-edit:hover {
+    background: #e9ecef;
 }
-.btn-acao.excluir {
-    background: #e74c3c;
-    color: #fff;
+
+.btn-delete {
+    background: #f8f9fa;
+    color: #dc3545;
 }
-.btn-acao.excluir:hover {
-    background: #922b21;
+
+.btn-delete:hover {
+    background: #f8d7da;
 }
-.linha {
-    margin-bottom: 2px;
+
+@media (max-width: 768px) {
+    .tudo {
+        padding: 16px;
+    }
+    
+    .barra-do-titulo {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+        padding: 24px;
+    }
+    
+    .titulo h1 {
+        font-size: 1.5rem;
+    }
+    
+    .modal-form {
+        min-width: 100%;
+        max-width: 100%;
+        margin: 20px;
+    }
+    
+    .form-endereco {
+        padding: 24px;
+    }
+    
+    .enderecos-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .endereco-card {
+        padding: 16px;
+    }
+    
+    .endereco-content {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .endereco-acoes {
+        justify-content: flex-end;
+    }
 }
-.nenhum-endereco {
-    color: #888;
-    margin-top: 20px;
-    font-size: 1.1rem;
-}
-.carregando {
-    color: #3a9c73;
-    margin-top: 20px;
-    font-size: 1.1rem;
-}
-.erro {
-    color: #c0392b;
-    margin-top: 20px;
-    font-size: 1.1rem;
+
+@media (max-width: 480px) {
+    .tudo {
+        padding: 12px;
+    }
+    
+    .barra-do-titulo {
+        padding: 20px;
+    }
+    
+    .titulo h1 {
+        font-size: 1.3rem;
+    }
+    
+    .btn-novo-endereco {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .form-endereco {
+        padding: 20px;
+    }
+    
+    .campo input {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .endereco-card {
+        padding: 12px;
+    }
+    
+    .endereco-principal h3 {
+        font-size: 1rem;
+    }
+    
+    .endereco-principal p {
+        font-size: 0.85rem;
+    }
+    
+    .btn-edit, .btn-delete {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
 }
 </style>

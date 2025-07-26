@@ -18,6 +18,8 @@ html, body {
   background-repeat: no-repeat;
   background-blend-mode: overlay;
   color: #000;
+  width: 100%;
+  max-width: 100%;
 }
 
 img, picture, video, canvas, svg {

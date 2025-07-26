@@ -62,6 +62,9 @@
     margin: 0 auto;
     padding: 0 24px;
     gap: 32px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 .footer-col {
     flex: 1 1 180px;
