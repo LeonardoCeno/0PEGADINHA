@@ -26,6 +26,7 @@
         <button class="nav left" @click="voltar">&#10094;</button>
         <button class="nav right" @click="avancar">&#10095;</button>
     </div>
+    <div class="carrosel-container">
     <div class="carrosel-linha" >
         <div class="carrosel-movimento">
             <img src="./img/IMAGEMDOSACI.png" alt="">
@@ -45,6 +46,7 @@
             <img src="./img/IMAGEMDOSACI2.png" alt="">
             <img src="./img/IMAGEMDOSACI.png" alt="">
         </div>
+    </div>
     </div>
     <div class="beneficios">
     <div class="item">
@@ -132,14 +134,26 @@ onUnmounted(() => {
 
 <style scoped>
 
-.carrosel-linha {
+.carrosel-container {
+    padding-top: 10px;
     display: flex;
-    align-items: center;
-    overflow: hidden;
-    width: 100%;
+    flex-direction: column;
     overflow: hidden;
     background-color: #ffffff;
 }
+
+.carrosel-linha {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+}
+
+.carrosel-linha img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .carrosel-movimento {
     display: flex;
     animation: deslizar-linha 120s linear infinite;
@@ -169,10 +183,11 @@ onUnmounted(() => {
     flex-direction: column;
     position: relative;
     overflow: hidden;
-    background-color: rgba(240, 240, 240, 0.226);
+    background-color: rgb(255, 255, 255);
     height: 45vh;
     min-height: 300px;
-    width: 100%;
+    width: 100vw;
+    transition: all 0.3s ease;
 }
 
 @media (max-width: 1300px) {
@@ -196,9 +211,7 @@ onUnmounted(() => {
 }
 @media (max-width: 480px) {
     .banner {
-        min-height: 80px;
-        height: 22vw;
-        max-width: 100vw;
+        display: none;
     }
 }
 
@@ -224,10 +237,12 @@ onUnmounted(() => {
 
 .img1 {
     width: 100%;
-    height: 90%;
+    height: 100%;
+    object-fit: contain;
     object-position: center;
-    background-size: cover;
+    background-size: contain;
     transform: translateY(-3px);
+    overflow: hidden;
 }
 
 .nav {
@@ -257,8 +272,8 @@ onUnmounted(() => {
     z-index: 10;
     align-items: center;
     position: relative;
-    right: 5px;
-    bottom: 1.6rem;
+    bottom: 0.2rem;
+    left: 0.1rem;
 }
 
 .indicator {

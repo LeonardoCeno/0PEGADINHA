@@ -4,7 +4,7 @@
 <div class="Tudo">
     <div class="menuesquerdo" >
         <h2> <span class="h2fake" > Olá, {{ usuario.name }}</span> 👋 </h2>
-        <router-link id="primeiro" to="/dados"> <button>Meus dados</button></router-link>
+        <router-link to="/dados"> <button>Meus dados</button></router-link>
         <router-link to="/carrinho"> <button>Carrinho</button></router-link>
         <router-link to="/favoritos"> <button>Favoritos</button></router-link>
         <router-link to="/pedidos"> <button>Pedidos</button></router-link>
@@ -108,9 +108,7 @@ onMounted(async () => {
     font-size: 1rem;
 }
 
-#primeiro button {
-    border-radius: 12px 0 0 0;
-}
+
 
 .menuesquerdo button:hover{
     transition: 0.1s;

@@ -279,9 +279,9 @@ function pesquisarEnter() {
 <style scoped>
 
 .top-bar {
-    background: #02060af5;
+    background: #ffffff;
     padding: 8px 0;
-    border-bottom: 1px solid #333333;
+    border-bottom: 1px solid #02060af5;
 }
 
 .top-bar-links {
@@ -294,7 +294,7 @@ function pesquisarEnter() {
 }
 
 .top-link {
-    color: #ffffff;
+    color: #02060af5;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -627,7 +627,7 @@ button:hover img {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 7vh;
+    min-height: 6vh;
     background: #02060af5;
     font-size: 14px;
     gap: 70px;
