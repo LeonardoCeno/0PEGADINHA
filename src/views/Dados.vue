@@ -319,7 +319,7 @@ p {
     transition: color 0.2s;
     color: #333;
     text-decoration: none;
-    font-size: 1.6vw;
+    font-size: 160%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

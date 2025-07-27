@@ -30,7 +30,7 @@
             <img src="./img/maisumcarrinho.png" alt="">
             <p>Remover</p>
         </button>
-        <img src="./img/coraçaofav.png" alt="">
+        <img :src="produtoEstaNosFavoritos(produto.id) ? CORACAOFAV : CORACAOVAZIO" alt="" @click="toggleFavorito(produto.id)" style="cursor: pointer;" :class="{ 'coracao-favorito': produtoEstaNosFavoritos(produto.id) }">
         </div>
     </div>
     </div>
@@ -69,7 +69,7 @@
             <img src="./img/maisumcarrinho.png" alt="">
             <p>Remover</p>
         </button>
-        <img src="./img/coraçaofav.png" alt="">
+        <img :src="produtoEstaNosFavoritos(produto.id) ? CORACAOFAV : CORACAOVAZIO" alt="" @click="toggleFavorito(produto.id)" style="cursor: pointer;" :class="{ 'coracao-favorito': produtoEstaNosFavoritos(produto.id) }">
         </div>
     </div>
     </div>
@@ -90,6 +90,8 @@ import { useToast } from 'vue-toastification'
 
 import DISPONIVELREAL from './img/DISPONIVELREAL.png'
 import INDISPONIVELREAL from './img/INDISPONIVELREAL.png'
+import CORACAOFAV from './img/coraçaofav.png'
+import CORACAOVAZIO from './img/coraçaovazio.png'
 
 const apiBase = 'http://35.196.79.227:8000'
 const produtos = ref([])
@@ -100,6 +102,9 @@ const mostrarQuantidadeOfertas = ref(10)
 const estadoBotaoObras = ref('mais') // 'mais' ou 'menos'
 const estadoBotaoOfertas = ref('mais')
 const toast = useToast()
+
+// Variável reativa para forçar atualização dos favoritos
+const favoritosAtualizados = ref(0)
 
 // Verificar se o usuário está logado
 const isLoggedIn = computed(() => {
@@ -119,6 +124,44 @@ const produtoEstaNoCarrinho = (produtoId) => {
 const getQuantidadeNoCarrinho = (produtoId) => {
     const item = itensCarrinho.value.find(item => item.product_id === produtoId)
     return item ? item.quantity : 0
+}
+
+// Função para verificar se um produto está nos favoritos
+const produtoEstaNosFavoritos = (produtoId) => {
+    // Usar a variável reativa para forçar recálculo
+    favoritosAtualizados.value
+    
+    const favoritosStorage = localStorage.getItem('favoritos')
+    if (favoritosStorage) {
+        const favoritosIds = JSON.parse(favoritosStorage)
+        return favoritosIds.includes(produtoId)
+    }
+    return false
+}
+
+// Função para adicionar/remover dos favoritos
+function toggleFavorito(produtoId) {
+    const favoritosStorage = localStorage.getItem('favoritos')
+    let favoritosIds = []
+    
+    if (favoritosStorage) {
+        favoritosIds = JSON.parse(favoritosStorage)
+    }
+    
+    if (produtoEstaNosFavoritos(produtoId)) {
+        // Remover dos favoritos
+        favoritosIds = favoritosIds.filter(id => id !== produtoId)
+        toast.success('Produto removido dos favoritos!', { timeout: 3500 })
+    } else {
+        // Adicionar aos favoritos
+        favoritosIds.push(produtoId)
+        toast.success('Produto adicionado aos favoritos!', { timeout: 3500 })
+    }
+    
+    localStorage.setItem('favoritos', JSON.stringify(favoritosIds))
+    
+    // Forçar atualização da interface
+    favoritosAtualizados.value++
 }
 
 onMounted(async () => {
@@ -217,7 +260,7 @@ async function adicionarAoCarrinho(produto) {
         const precoUnitario = typeof produto.price === 'string' ? parseFloat(produto.price) : produto.price
         
         await adicionarItemCarrinho(produto.id, 1, precoUnitario)
-        toast.success('Produto adicionado ao carrinho!')
+        toast.success('Produto adicionado ao carrinho!', { timeout: 3500 })
         await carregarCarrinho() // Recarregar carrinho
         
         // Notificar outros componentes sobre a mudança no carrinho
@@ -232,7 +275,7 @@ async function adicionarAoCarrinho(produto) {
 async function removerDoCarrinho(produto) {
     try {
         await removerItemCarrinho(produto.id)
-        toast.success('Produto removido do carrinho!')
+        toast.success('Produto removido do carrinho!', { timeout: 3500 })
         await carregarCarrinho() // Recarregar carrinho
         
         // Notificar outros componentes sobre a mudança no carrinho
@@ -298,6 +341,7 @@ async function removerDoCarrinho(produto) {
     width: 100%;
     max-width: 1250px;
     margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 #cord {
@@ -390,6 +434,11 @@ async function removerDoCarrinho(produto) {
 
 .add img:hover {
     opacity: 0.8;
+}
+
+/* Estilo para coração vermelho quando está nos favoritos */
+.add img.coracao-favorito {
+    filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
 }
 
 .produto {

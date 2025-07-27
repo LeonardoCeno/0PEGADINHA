@@ -1,6 +1,6 @@
 <template>
-    <div class="colunas" >
-    <button v-if="visivel" class="btn-topo" @click="voltarAoTopo">▲</button>
+    <div v-if="visivel" class="colunas" >
+    <button class="btn-topo" @click="voltarAoTopo">▲</button>
     <h1>TOP</h1>
     </div>
 </template>

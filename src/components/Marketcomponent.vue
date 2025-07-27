@@ -244,7 +244,7 @@ onUnmounted(() => {
     object-fit: contain;
     object-position: center;
     background-size: contain;
-    transform: translateY(-3px);
+    transform: translateY(-10px);
     overflow: hidden;
 }
 

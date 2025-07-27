@@ -128,7 +128,7 @@
                             <img src="../components/img/maisumcarrinho.png" alt="">
                             <p>Remover</p>
                         </button>
-                        <img src="../components/img/coraçaofav.png" alt="">
+                        <img :src="produtoEstaNosFavoritos(produto.id) ? CORACAOFAV : CORACAOVAZIO" alt="" @click="toggleFavorito(produto.id)" style="cursor: pointer;" :class="{ 'coracao-favorito': produtoEstaNosFavoritos(produto.id) }">
                     </div>
                 </div>
             </div>
@@ -149,7 +149,7 @@
                             <img src="../components/img/maisumcarrinho.png" alt="">
                             <p>Remover</p>
                         </button>
-                        <img src="../components/img/coraçaofav.png" alt="">
+                        <img :src="produtoEstaNosFavoritos(produto.id) ? CORACAOFAV : CORACAOVAZIO" alt="" @click="toggleFavorito(produto.id)" style="cursor: pointer;" :class="{ 'coracao-favorito': produtoEstaNosFavoritos(produto.id) }">
                         </div>
                         </div>
                     </div>
@@ -218,6 +218,8 @@ import api, { adicionarItemCarrinho, removerItemCarrinho, getItensCarrinho } fro
 import { useToast } from 'vue-toastification'
 import DISPONIVELREAL from '../components/img/DISPONIVELREAL.png'
 import INDISPONIVELREAL from '../components/img/INDISPONIVELREAL.png'
+import CORACAOFAV from '../components/img/coraçaofav.png'
+import CORACAOVAZIO from '../components/img/coraçaovazio.png'
 import { getCategoriasPorUsuario228 } from '../services/api'
 
 // muitas const, fazer oq
@@ -249,6 +251,47 @@ const itensCarrinho = ref([])
 // Função para verificar se um produto está no carrinho
 const produtoEstaNoCarrinho = (produtoId) => {
     return itensCarrinho.value.some(item => item.product_id === produtoId)
+}
+
+// Função para verificar se um produto está nos favoritos
+const produtoEstaNosFavoritos = (produtoId) => {
+    // Usar a variável reativa para forçar recálculo
+    favoritosAtualizados.value
+    
+    const favoritosStorage = localStorage.getItem('favoritos')
+    if (favoritosStorage) {
+        const favoritosIds = JSON.parse(favoritosStorage)
+        return favoritosIds.includes(produtoId)
+    }
+    return false
+}
+
+// Variável reativa para forçar atualização
+const favoritosAtualizados = ref(0)
+
+// Função para adicionar/remover dos favoritos
+function toggleFavorito(produtoId) {
+    const favoritosStorage = localStorage.getItem('favoritos')
+    let favoritosIds = []
+    
+    if (favoritosStorage) {
+        favoritosIds = JSON.parse(favoritosStorage)
+    }
+    
+    if (produtoEstaNosFavoritos(produtoId)) {
+        // Remover dos favoritos
+        favoritosIds = favoritosIds.filter(id => id !== produtoId)
+        toast.success('Produto removido dos favoritos!', { timeout: 3500 })
+    } else {
+        // Adicionar aos favoritos
+        favoritosIds.push(produtoId)
+        toast.success('Produto adicionado aos favoritos!', { timeout: 3500 })
+    }
+    
+    localStorage.setItem('favoritos', JSON.stringify(favoritosIds))
+    
+    // Forçar atualização da interface
+    favoritosAtualizados.value++
 }
 
 // Sistema de paginação completamente novo
@@ -548,7 +591,7 @@ async function adicionarAoCarrinho(produto) {
         const precoUnitario = typeof produto.price === 'string' ? parseFloat(produto.price) : produto.price
         
         await adicionarItemCarrinho(produto.id, 1, precoUnitario)
-        toast.success('Produto adicionado ao carrinho!')
+        toast.success('Produto adicionado ao carrinho!', { timeout: 3500 })
         await carregarCarrinho() // Recarregar carrinho
         
         // Notificar outros componentes sobre a mudança no carrinho
@@ -563,7 +606,7 @@ async function adicionarAoCarrinho(produto) {
 async function removerDoCarrinho(produto) {
     try {
         await removerItemCarrinho(produto.id)
-        toast.success('Produto removido do carrinho!')
+        toast.success('Produto removido do carrinho!', { timeout: 3500 })
         await carregarCarrinho() // Recarregar carrinho
         
         // Notificar outros componentes sobre a mudança no carrinho
@@ -672,14 +715,19 @@ watch(totalPaginas, (novoTotal) => {
 }
 
 .nome-preco-imagem2 .aolado img {
-    width: 22px;
-    height: 22px;
+    width: 27px;
+    height: 27px;
     border: none;
     opacity: 0.92;
 }
 
 .nome-preco-imagem2 .aolado img:hover {
     opacity: 0.8;
+}
+
+/* Filtro para deixar o coração vermelho quando estiver nos favoritos (modo modoum) */
+.nome-preco-imagem2 .aolado img.coracao-favorito {
+    filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
 }
 
 .nome-preco-imagem2 .aolado button {
@@ -704,8 +752,6 @@ watch(totalPaginas, (novoTotal) => {
 .nome-preco-imagem2 .aolado button:hover {
     opacity: 0.8;
 }
-
-
 
 .lista-pesquisa2 {
     display: flex;
@@ -1057,12 +1103,16 @@ watch(totalPaginas, (novoTotal) => {
     filter: invert(1);
 }
 .add img {
-    width: 24px;
+    width: 27px;
     height: auto;
     filter: invert(6%) sepia(50%) saturate(200%) hue-rotate(160deg) brightness(100%) contrast(100%);
 }
 .add img:hover {
     opacity: 0.9;
+}
+
+.add img.coracao-favorito {
+    filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
 }
 
 .produto:hover .add {
