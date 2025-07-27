@@ -219,6 +219,9 @@ async function adicionarAoCarrinho(produto) {
         await adicionarItemCarrinho(produto.id, 1, precoUnitario)
         toast.success('Produto adicionado ao carrinho!')
         await carregarCarrinho() // Recarregar carrinho
+        
+        // Notificar outros componentes sobre a mudança no carrinho
+        window.dispatchEvent(new Event('carrinho-atualizado'))
     } catch (error) {
         console.error('Erro ao adicionar produto:', error)
         toast.error('Erro ao adicionar produto ao carrinho.')
@@ -231,6 +234,9 @@ async function removerDoCarrinho(produto) {
         await removerItemCarrinho(produto.id)
         toast.success('Produto removido do carrinho!')
         await carregarCarrinho() // Recarregar carrinho
+        
+        // Notificar outros componentes sobre a mudança no carrinho
+        window.dispatchEvent(new Event('carrinho-atualizado'))
     } catch (error) {
         console.error('Erro ao remover produto:', error)
         toast.error('Erro ao remover produto do carrinho.')

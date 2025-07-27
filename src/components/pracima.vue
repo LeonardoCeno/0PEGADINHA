@@ -1,9 +1,11 @@
 <template>
+    <div class="colunas" >
     <button v-if="visivel" class="btn-topo" @click="voltarAoTopo">▲</button>
+    <h1>TOP</h1>
+    </div>
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
 const props = defineProps({
     visivel: { type: Boolean, default: true }
 })
@@ -13,14 +15,27 @@ function voltarAoTopo() {
 </script>
 
 <style scoped>
-.btn-topo {
+
+.colunas {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     position: fixed;
     right: 22px;
     top: 80%;
-    transform: translateY(-50%);
+}
+
+.colunas h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.btn-topo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 9999;
     background: #222;
     color: #fff;
@@ -32,7 +47,10 @@ function voltarAoTopo() {
     cursor: pointer;
     opacity: 0.7;
 }
+
 .btn-topo:hover {
     opacity: 1;
 }
+
+
 </style>

@@ -1,10 +1,9 @@
 <template>
-    <div class="fixador" >
     <!-- Nova barrinha no topo -->
     <div class="top-bar">
         <div class="top-bar-links">
             <router-link to="/" class="top-link">Home</router-link>
-            <router-link to="/favoritos" class="top-link">Favoritos</router-link>
+            <router-link to="/dados" class="top-link">Painel</router-link>
             <router-link to="/pedidos" class="top-link">Meus Pedidos</router-link>
         </div>
     </div>
@@ -105,6 +104,7 @@
                 </button>
                 <div v-if="showDropdown" class="conta-dropdown-menu">
                     <button @click="goToPainel">Dados</button>
+                    <button @click="goToFavoritos">Favoritos</button>
                     <button @click="logout">Sair</button>
                 </div>
             </div>
@@ -127,6 +127,7 @@
                 </button>
                 <div v-if="showDropdown" class="conta-dropdown-menu">
                     <button @click="goToPainel">Dados</button>
+                    <button @click="goToFavoritos">Favoritos</button>
                     <button @click="logout">Sair</button>
                 </div>
             </div>
@@ -228,11 +229,10 @@
         <button @click="irParaOfertas"> <img src="../components/img/ofertasfinal.png" alt=""> <p>Ofertas</p></button>
         <button @click="irParaPesquisas"> <img src="../components/img/Tudofinal-Photoroom.png" alt=""> <p>Tudo</p></button>
     </div>
-</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import api, { buscarProdutosAdmin228, getItensCarrinho, removerItemCarrinho, atualizarQuantidadeCarrinho } from '../services/api'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
@@ -256,16 +256,16 @@ const itensCarrinho = ref([])
 const carregandoCarrinho = ref(false)
 
 const totalItensCarrinho = computed(() => {
-  return itensCarrinho.value.reduce((total, item) => total + item.quantity, 0)
+    return itensCarrinho.value.reduce((total, item) => total + item.quantity, 0)
 })
 
 const totalPrecoCarrinho = computed(() => {
-  return itensCarrinho.value.reduce((total, item) => total + (item.unit_price * item.quantity), 0).toFixed(2)
+    return itensCarrinho.value.reduce((total, item) => total + (item.unit_price * item.quantity), 0).toFixed(2)
 })
 
 // Função para verificar se um produto está no carrinho
 const produtoEstaNoCarrinho = (produtoId) => {
-  return itensCarrinho.value.some(item => item.product_id === produtoId)
+    return itensCarrinho.value.some(item => item.product_id === produtoId)
 }
 
 // isso carrega as categorias criadas para que atualize o "categorias" do header automaticamente ao o admin criar um nova
@@ -282,19 +282,11 @@ onMounted(() => {
     if (isLoggedIn.value) {
         carregarCarrinho()
     }
-})
-
-// Watcher para recarregar carrinho quando o usuário fizer login
-watch(isLoggedIn, (novoValor) => {
-    if (novoValor) {
-        carregarCarrinho()
-    } else {
-        itensCarrinho.value = []
-    }
-})
-
-// Event listener para fechar carrinho ao clicar fora
-onMounted(() => {
+    
+    // Escutar mudanças no carrinho de outros componentes
+    window.addEventListener('carrinho-atualizado', carregarCarrinho)
+    
+    // Event listener para fechar carrinho ao clicar fora
     document.addEventListener('click', (event) => {
         const carrinhoWrapper = document.querySelector('.carrinho-dropdown-wrapper')
         const carrinhoMenu = document.querySelector('.carrinho-dropdown-menu')
@@ -307,6 +299,20 @@ onMounted(() => {
             showCarrinhoDropdown.value = false
         }
     })
+})
+
+onUnmounted(() => {
+    // Remover event listener
+    window.removeEventListener('carrinho-atualizado', carregarCarrinho)
+})
+
+// Watcher para recarregar carrinho quando o usuário fizer login
+watch(isLoggedIn, (novoValor) => {
+    if (novoValor) {
+        carregarCarrinho()
+    } else {
+        itensCarrinho.value = []
+    }
 })
 
 // isso aqui é pra que se o usuario estiver no painel a parte das categorias abaixo do header não aparecer (sim, é uma soluçao pra nao ter que separar ele do header pq fiz os 2 junto num outro componente 👍)
@@ -392,6 +398,11 @@ function goToPainel() {
     showDropdown.value = false
     router.push('/dados')
 }
+
+function goToFavoritos() {
+    showDropdown.value = false
+    router.push('/favoritos')
+}
 function irParaPesquisas() {
     router.push('/pesquisas')
 }
@@ -457,6 +468,9 @@ async function removerItemCarrinhoLocal(produtoId) {
         await removerItemCarrinho(produtoId)
         toast.success('Item removido do carrinho!')
         await carregarCarrinho()
+        
+        // Notificar outros componentes sobre a mudança no carrinho
+        window.dispatchEvent(new Event('carrinho-atualizado'))
     } catch (error) {
         toast.error('Erro ao remover item do carrinho.')
         console.error('Erro ao remover item:', error)
@@ -470,6 +484,9 @@ async function aumentarQuantidade(produtoId) {
         if (item) {
             await atualizarQuantidadeCarrinho(produtoId, item.quantity + 1)
             await carregarCarrinho()
+            
+            // Notificar outros componentes sobre a mudança no carrinho
+            window.dispatchEvent(new Event('carrinho-atualizado'))
         }
     } catch (error) {
         toast.error('Erro ao aumentar quantidade.')
@@ -484,6 +501,9 @@ async function diminuirQuantidade(produtoId) {
         if (item && item.quantity > 1) {
             await atualizarQuantidadeCarrinho(produtoId, item.quantity - 1)
             await carregarCarrinho()
+            
+            // Notificar outros componentes sobre a mudança no carrinho
+            window.dispatchEvent(new Event('carrinho-atualizado'))
         } else if (item && item.quantity === 1) {
             // Se quantidade for 1, remove o item
             await removerItemCarrinhoLocal(produtoId)
@@ -982,18 +1002,22 @@ button:hover img {
     border-radius: 8px;
     min-width: 320px;
     max-width: 400px;
-    max-height: 500px;
+    height: auto;
     z-index: 1000;
     padding: 0;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .carrinho-dropdown-menu.mobile {
-    right: 10px;
+    display: flex;
+    flex-direction: column;
+    top: 100px;
     min-width: 280px;
     max-width: 320px;
-    max-height: 450px;
+    height: 550px;
 }
 
 .carrinho-header {
@@ -1003,6 +1027,7 @@ button:hover img {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .carrinho-header h4 {
@@ -1051,8 +1076,8 @@ button:hover img {
 }
 
 .carrinho-itens {
-    max-height: 400px;
-    overflow-y: auto;
+    flex: 1;
+    overflow-y: hidden;
 }
 
 .carrinho-item {
@@ -1068,10 +1093,9 @@ button:hover img {
     background-color: #f8f9fa;
 }
 
-.carrinho-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
+.carrinho-dropdown-menu .carrinho-item img {
+    width: 60px;
+    height: 80px;
     border-radius: 4px;
     margin-right: 12px;
     border: 1px solid #e9ecef;
@@ -1164,6 +1188,7 @@ button:hover img {
     background: #f8f9fa;
     padding: 16px;
     border-top: 1px solid #e9ecef;
+    flex-shrink: 0;
 }
 
 .carrinho-total-preco {
@@ -1206,12 +1231,12 @@ button:hover img {
 }
 
 .btn-finalizar {
-    background: #2c3e50;
+    background: #02060af5;
     color: white;
 }
 
 .btn-finalizar:hover {
-    background: #34495e;
+    background: #02060ac2;
 }
 
 /* Responsividade do carrinho */

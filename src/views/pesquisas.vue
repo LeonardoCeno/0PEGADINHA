@@ -3,6 +3,7 @@
 <Header></Header>
 
 <div class="imagemdefundo" >
+    <pracima :visivel="mostrarBotaoTopo"></pracima>
 <div class="inputpesquisa" >
     <h2 v-if="isLancamentos">Lançamentos</h2>
     <h2 v-else-if="categoriaSelecionada"> {{ categoriaSelecionada.name }} </h2>
@@ -111,7 +112,7 @@
             <div v-else-if="erro" class="erro">{{ erro }}</div>
             <div v-else-if="produtosFiltrados.length === 0" class="nenhum-produto">Nenhum produto encontrado.</div>
             <div v-else-if="!modoum" class="lista-pesquisa">
-                <div class="produto" v-for="produto in produtosFiltrados.slice(0, 20)" :key="produto.id">
+                <div class="produto" v-for="produto in produtosPaginados" :key="produto.id">
                     <div class="nome-preco-imagem" style="position:relative;">
                         <img :src="produto.image_path" alt="Imagem do produto" class="produto-imagem" />
                         <img :src="produto.stock >= 1 ? DISPONIVELREAL : INDISPONIVELREAL" :alt="produto.stock >= 1 ? 'Disponível' : 'Indisponível'" class="disponivel-selo" />
@@ -132,7 +133,7 @@
                 </div>
             </div>
             <div v-if="modoum" class="lista-pesquisa2">
-                <div class="produto2" v-for="produto in produtosFiltrados.slice(0, 7)" :key="produto.id">
+                <div class="produto2" v-for="produto in produtosPaginados" :key="produto.id">
                     <div class="nome-preco-imagem2" style="position:relative;">
                         <img :src="produto.image_path" alt="Imagem do produto" class="produto-imagem" />
                         <img :src="produto.stock >= 1 ? DISPONIVELREAL : INDISPONIVELREAL" :alt="produto.stock >= 1 ? 'Disponível' : 'Indisponível'" class="disponivel-selo2" />
@@ -154,6 +155,50 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Sistema de Paginação -->
+            <div v-if="produtosFiltrados.length > 0" class="paginacao-container">
+                <div class="paginacao-esquerda">
+                    <div class="paginacao-numeros">
+                        <button 
+                            @click="paginaAnterior()"
+                            class="paginacao-btn seta"
+                            :disabled="paginaAtual <= 1"
+                        >
+                            &lt;
+                        </button>
+                        <button 
+                            v-for="pagina in paginasVisiveis" 
+                            :key="pagina"
+                            @click="irParaPagina(pagina)"
+                            :class="['paginacao-btn', { 'ativo': pagina === paginaAtual }]"
+                        >
+                            {{ pagina }}
+                        </button>
+                        <button 
+                            @click="proximaPagina()"
+                            class="paginacao-btn seta"
+                            :disabled="paginaAtual >= totalPaginas"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="paginacao-direita">
+                    <span>Mostrar</span>
+                    <select v-model="itensPorPagina" @change="mudarItensPorPagina" class="paginacao-select">
+                        <option value="12">12</option>
+                        <option value="20">20</option>
+                        <option value="24">24</option>
+                        <option value="32">32</option>
+                    </select>
+                    <span>por página</span>
+                    <span class="paginacao-info">
+                        {{ (paginaAtual - 1) * itensPorPagina + 1 }}-{{ Math.min(paginaAtual * itensPorPagina, produtosFiltrados.length) }} de {{ produtosFiltrados.length }}
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -164,10 +209,11 @@
 
 <script setup>
 // muitas importações né?
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Header from '../components/Headercomponent.vue'
 import Footer from '../components/Footercomponent.vue'
+import pracima from '../components/pracima.vue'
 import api, { adicionarItemCarrinho, removerItemCarrinho, getItensCarrinho } from '../services/api'
 import { useToast } from 'vue-toastification'
 import DISPONIVELREAL from '../components/img/DISPONIVELREAL.png'
@@ -179,12 +225,17 @@ const abertoPrecos = ref(false)
 const abertoCategoria = ref(false)
 const abertoFormato = ref(false)
 const abertoDescontos = ref(false)
+const mostrarBotaoTopo = ref(false)
 const ordemSelecionada = ref('Padrao')
 const produtos = ref([])
 const produtosFiltrados = ref([])
 const carregando = ref(false)
 const erro = ref('')
 const toast = useToast()
+
+// Paginação
+const paginaAtual = ref(1)
+const itensPorPagina = ref(20) // Padrão para modo grid (!modoum)
 
 // Verificar se o usuário está logado
 const isLoggedIn = computed(() => {
@@ -199,6 +250,52 @@ const itensCarrinho = ref([])
 const produtoEstaNoCarrinho = (produtoId) => {
     return itensCarrinho.value.some(item => item.product_id === produtoId)
 }
+
+// Sistema de paginação completamente novo
+const totalPaginas = computed(() => {
+    const total = produtosFiltrados.value.length
+    if (total === 0) return 0
+    return Math.ceil(total / itensPorPagina.value)
+})
+
+const produtosPaginados = computed(() => {
+    const produtos = produtosFiltrados.value
+    if (produtos.length === 0) return []
+    
+    const inicio = (paginaAtual.value - 1) * itensPorPagina.value
+    const fim = Math.min(inicio + itensPorPagina.value, produtos.length)
+    
+    return produtos.slice(inicio, fim)
+})
+
+const paginasVisiveis = computed(() => {
+    const total = totalPaginas.value
+    if (total === 0) return []
+    
+    const paginas = []
+    
+    // Se tem 10 páginas ou menos, mostra todas
+    if (total <= 10) {
+        for (let i = 1; i <= total; i++) {
+            paginas.push(i)
+        }
+    } else {
+        // Se tem mais de 10 páginas, mostra uma janela de 10 páginas
+        let inicio = Math.max(1, paginaAtual.value - 4)
+        let fim = Math.min(total, inicio + 9)
+        
+        // Ajusta se estamos no final
+        if (fim === total) {
+            inicio = Math.max(1, fim - 9)
+        }
+        
+        for (let i = inicio; i <= fim; i++) {
+            paginas.push(i)
+        }
+    }
+    
+    return paginas
+})
 
 // Função para obter quantidade de um produto no carrinho
 const getQuantidadeNoCarrinho = (produtoId) => {
@@ -362,16 +459,14 @@ function filtrarProdutos() {
     if (categoriaSelecionadaId.value) {
     filtrados = filtrados.filter(p => p.category_id == categoriaSelecionadaId.value)
     }
-    // coloca limite global de 20 com exceção do lançamentos q coloquei separado o dele logo abaixo, 
-    // visto que ele não é um "categoria criada" um filtro com base do id maior pro menor
-    let limite = 20
+    
+    // Aplica ordenação sem limite - a paginação cuidará do limite
     if (isLancamentos.value) {
         filtrados = filtrados.slice().sort((a, b) => b.id - a.id)
-        limite = 12
     }
 
-    // aplica a ordenação dinâmica e limite final
-    produtosFiltrados.value = ordenarProdutos(filtrados).slice(0, limite)
+    // aplica a ordenação dinâmica sem limite
+    produtosFiltrados.value = ordenarProdutos(filtrados)
 }
 
 // busca os produtos da categoria da vez que foi selecionada pelo usuario
@@ -385,6 +480,9 @@ onMounted(async () => {
     if (isLoggedIn.value) {
         await carregarCarrinho()
     }
+    
+    // Adicionar listener para detectar quando o header dos filtros não está visível
+    window.addEventListener('scroll', verificarVisibilidadeHeader)
 })
 
 // Watch q reage a mudanças na URL (termo, categoriaId, lancamentos etc)
@@ -452,6 +550,9 @@ async function adicionarAoCarrinho(produto) {
         await adicionarItemCarrinho(produto.id, 1, precoUnitario)
         toast.success('Produto adicionado ao carrinho!')
         await carregarCarrinho() // Recarregar carrinho
+        
+        // Notificar outros componentes sobre a mudança no carrinho
+        window.dispatchEvent(new Event('carrinho-atualizado'))
     } catch (error) {
         console.error('Erro ao adicionar produto:', error)
         toast.error('Erro ao adicionar produto ao carrinho.')
@@ -464,11 +565,76 @@ async function removerDoCarrinho(produto) {
         await removerItemCarrinho(produto.id)
         toast.success('Produto removido do carrinho!')
         await carregarCarrinho() // Recarregar carrinho
+        
+        // Notificar outros componentes sobre a mudança no carrinho
+        window.dispatchEvent(new Event('carrinho-atualizado'))
     } catch (error) {
         console.error('Erro ao remover produto:', error)
         toast.error('Erro ao remover produto do carrinho.')
     }
 }
+
+// Funções de paginação simplificadas
+function irParaPagina(pagina) {
+    if (pagina >= 1 && pagina <= totalPaginas.value) {
+        paginaAtual.value = pagina
+        irParaTopo()
+    }
+}
+
+function mudarItensPorPagina() {
+    paginaAtual.value = 1
+    irParaTopo()
+}
+
+function proximaPagina() {
+    if (paginaAtual.value < totalPaginas.value) {
+        paginaAtual.value++
+        irParaTopo()
+    }
+}
+
+function paginaAnterior() {
+    if (paginaAtual.value > 1) {
+        paginaAtual.value--
+        irParaTopo()
+    }
+}
+
+function irParaTopo() {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// Função para verificar se o header dos filtros está visível
+function verificarVisibilidadeHeader() {
+    const filtrosHeader = document.querySelector('.filtros-header')
+    if (filtrosHeader) {
+        const rect = filtrosHeader.getBoundingClientRect()
+        // Se o header dos filtros não está visível (está acima da viewport)
+        mostrarBotaoTopo.value = rect.bottom < 0
+    }
+}
+
+// Limpar listener quando componente for desmontado
+onUnmounted(() => {
+    window.removeEventListener('scroll', verificarVisibilidadeHeader)
+})
+
+// Watchers simplificados
+watch(produtosFiltrados, () => {
+    paginaAtual.value = 1
+})
+
+watch(modoum, (novoModo) => {
+    itensPorPagina.value = novoModo ? 12 : 20
+    paginaAtual.value = 1
+})
+
+watch(totalPaginas, (novoTotal) => {
+    if (paginaAtual.value > novoTotal && novoTotal > 0) {
+        paginaAtual.value = novoTotal
+    }
+})
 
 </script>
 
@@ -723,7 +889,7 @@ async function removerDoCarrinho(produto) {
 .conteudos {
     width: 1100px;
     height: 100%;
-    background-color: #777777fa;
+    background-color: transparent;
     margin-bottom: 100px;
 }
 
@@ -745,11 +911,10 @@ async function removerDoCarrinho(produto) {
     align-items: center;
     gap: 0;
     margin: 35px;
-    border: 1px solid rgba(173, 173, 173, 0.507);
 }
 
 .header-btn-quadrado {
-    width: 44px;
+    width: 50px;
     height: 44px;
     background: #fffffffa;
     color: #fff;
@@ -791,10 +956,8 @@ async function removerDoCarrinho(produto) {
 .tudo-conteudos {
     display: flex;
     flex-direction: column;
-    gap: 32px;
     width: 100%;
     align-items: center;
-    background-color: #fffffffa;
 }
 
 .lista-pesquisa {
@@ -807,6 +970,7 @@ async function removerDoCarrinho(produto) {
     padding-bottom: 25px;
     width: 100%;
     border: 1px solid rgba(173, 173, 173, 0.507);
+    background-color: #fffffffa;
 }
 
 .produto {
@@ -951,5 +1115,128 @@ async function removerDoCarrinho(produto) {
     }
 }
 
+/* Estilos da Paginação */
+.paginacao-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: none;
+    border: none;
+    width: 100%;
+}
+
+.paginacao-esquerda {
+    display: flex;
+    align-items: center;
+}
+
+.paginacao-numeros {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.paginacao-btn {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fffffffa;
+}
+
+.paginacao-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.paginacao-btn.ativo {
+    background: #02060af5;
+    color: white;
+    border-color: #02060af5;
+}
+
+.paginacao-btn.seta {
+    font-weight: bold;
+}
+
+.paginacao-btn:disabled {
+    cursor: not-allowed;
+    background: #fff;
+    color: #495057;
+    border-color: #dee2e6;
+}
+
+.paginacao-btn:disabled:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+
+
+
+
+.paginacao-direita {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.paginacao-info {
+    margin-left: 16px;
+    color: #666;
+    font-size: 12px;
+}
+
+.paginacao-select {
+    padding: 6px 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 14px;
+    color: #495057;
+    cursor: pointer;
+}
+
+.paginacao-select:focus {
+    outline: none;
+    border-color: #02060af5;
+}
+
+@media (max-width: 768px) {
+    .paginacao-container {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+    }
+    
+    .paginacao-numeros {
+        gap: 4px;
+    }
+    
+    .paginacao-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 32px;
+    }
+    
+    .paginacao-direita {
+        font-size: 12px;
+    }
+    
+    .paginacao-select {
+        padding: 4px 6px;
+        font-size: 12px;
+    }
+}
 
 </style>

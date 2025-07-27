@@ -140,6 +140,8 @@ onUnmounted(() => {
     flex-direction: column;
     overflow: hidden;
     background-color: #ffffff;
+    width: 100%;
+    max-width: 100%;
 }
 
 .carrosel-linha {
@@ -186,27 +188,28 @@ onUnmounted(() => {
     background-color: rgb(255, 255, 255);
     height: 45vh;
     min-height: 300px;
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     transition: all 0.3s ease;
 }
 
 @media (max-width: 1300px) {
     .banner {
-        max-width: 98vw;
+        max-width: 98%;
     }
 }
 @media (max-width: 900px) {
     .banner {
         min-height: 180px;
         height: 32vw;
-        max-width: 100vw;
+        max-width: 100%;
     }
 }
 @media (max-width: 650px) {
     .banner {
         min-height: 120px;
         height: 28vw;
-        max-width: 100vw;
+        max-width: 100%;
     }
 }
 @media (max-width: 480px) {

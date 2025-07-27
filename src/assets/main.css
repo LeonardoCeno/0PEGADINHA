@@ -22,12 +22,6 @@ html, body {
   max-width: 100%;
 }
 
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
 input, button, textarea, select {
   font: inherit;
 }

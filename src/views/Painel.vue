@@ -54,7 +54,7 @@ onMounted(async () => {
 
 .divisoria{
     width: 100%;
-    height: 15px;
+    height: 1px;
     background-color: #06080afa;
 }
 
