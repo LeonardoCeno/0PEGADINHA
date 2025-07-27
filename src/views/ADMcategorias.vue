@@ -41,20 +41,34 @@
                 </div> - {{ cat.description }}
                 <div class="BTli" >
                 <button @click="editarCategoria(cat)">Editar</button>
-                <button class="excluir-btn" @click="excluirCategoria(cat.id)">Excluir</button>
+                <button class="excluir-btn" @click="abrirModalExclusao(cat.id)">Excluir</button>
                 </div>
             </li>
         </ul>
         </div>
         </div>
     </div>
+    
+    <!-- Modal de Confirmação -->
+    <div v-if="mostrarModalConfirmacao" class="modal-overlay">
+        <div class="modal-confirmacao">
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir esta categoria?</p>
+            <div class="modal-botoes">
+                <button @click="confirmarExclusao" class="btn-confirmar">Confirmar</button>
+                <button @click="fecharModalConfirmacao" class="btn-cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useToast } from 'vue-toastification'
 import api from '../services/api'
 
 const apiBase = 'http://35.196.79.227:8000'
+const toast = useToast()
 const imagem = ref(null)
 const mensagem = ref('')
 
@@ -70,6 +84,8 @@ const editImagem = ref(null)
 const mensagemEdicao = ref('')
 
 const mostraFormulario = ref(false)
+const mostrarModalConfirmacao = ref(false)
+const categoriaParaExcluir = ref(null)
 
 const nomeForm = ref('')
 const descricaoForm = ref('')
@@ -106,14 +122,14 @@ async function criarCategoria() {
         await api.post('/categories/', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
-        mensagem.value = 'Categoria criada com sucesso!'
+        toast.success('Categoria criada com sucesso!')
         nomeForm.value = ''
         descricaoForm.value = ''
         imagemForm.value = null
         await carregarCategorias()
         fecharFormulario()
     } catch (e) {
-        mensagem.value = 'Erro ao criar categoria.'
+        toast.error('Erro ao criar categoria.')
     }
 }
 
@@ -193,22 +209,34 @@ async function atualizarCategoria() {
             headers: { 'Content-Type': 'multipart/form-data' }
             })
         }
-        mensagemEdicao.value = 'Categoria atualizada com sucesso!'
+        toast.success('Categoria atualizada com sucesso!')
         await carregarCategorias()
         cancelarEdicao()
     } catch (e) {
-        mensagemEdicao.value = 'Erro ao atualizar categoria.'
+        toast.error('Erro ao atualizar categoria.')
     }
 }
 
-async function excluirCategoria(id) {
-    if (!confirm('Tem certeza que deseja excluir esta categoria?')) return
+function abrirModalExclusao(id) {
+    categoriaParaExcluir.value = id
+    mostrarModalConfirmacao.value = true
+}
+
+async function confirmarExclusao() {
     try {
-        await api.delete(`/categories/${id}`)
+        await api.delete(`/categories/${categoriaParaExcluir.value}`)
+        toast.success('Categoria excluída com sucesso!')
         await carregarCategorias()
+        fecharModalConfirmacao()
     } catch (e) {
-        alert('Erro ao excluir categoria.')
+        toast.error('Erro ao excluir categoria.')
+        fecharModalConfirmacao()
     }
+}
+
+function fecharModalConfirmacao() {
+    mostrarModalConfirmacao.value = false
+    categoriaParaExcluir.value = null
 }
 
 function fecharFormulario() {
@@ -629,6 +657,95 @@ function abrirCriacao() {
     .produtos-count {
         font-size: 0.75rem;
         padding: 1px 4px;
+    }
+}
+
+/* Modal de Confirmação */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-confirmacao {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-confirmacao h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.modal-confirmacao p {
+    margin: 0 0 25px 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+.modal-botoes {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-confirmar {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-confirmar:hover {
+    background-color: #b71c1c;
+}
+
+.btn-cancelar {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-cancelar:hover {
+    background-color: #545b62;
+}
+
+@media (max-width: 480px) {
+    .modal-confirmacao {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .modal-botoes {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-confirmar,
+    .btn-cancelar {
+        padding: 12px 20px;
     }
 }
 

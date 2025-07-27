@@ -202,7 +202,6 @@ function alternarOfertas() {
 .produtos {
     width: 100%;
     max-width: 1250px;
-
 }
 
 .nome-preco-imagem {
@@ -213,7 +212,7 @@ function alternarOfertas() {
 
 .nome-preco-imagem p {
     font-size: 22px;
-    color: rgb(49, 49, 49);
+    color: rgb(37, 37, 37);
     font-weight: bold;
 }
 
@@ -306,7 +305,7 @@ function alternarOfertas() {
 }
 
 .produto h4 {
-    font-family: 'Roboto', sans-serif;
+    font-family: sans-serif;
     font-size: 15px;
     color: rgb(65, 65, 65);
     margin-top: 10px;

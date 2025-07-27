@@ -131,11 +131,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useToast } from 'vue-toastification'
 import { getEnderecos, criarEndereco, atualizarEndereco, deletarEndereco } from '../services/api'
 
 const enderecos = ref([])
 const carregando = ref(true)
 const erro = ref(null)
+const toast = useToast()
 const mostrarModal = ref(false)
 const modalEditar = ref(false)
 const enderecoEditando = ref({})
@@ -196,9 +198,10 @@ async function excluirEndereco(id) {
     if (confirm('Tem certeza que deseja excluir este endereço?')) {
         try {
             await deletarEndereco(id)
+            toast.success('Endereço excluído com sucesso!')
             await carregarEnderecos()
         } catch (e) {
-            erro.value = 'Erro ao excluir endereço.'
+            toast.error('Erro ao excluir endereço.')
         }
     }
 }

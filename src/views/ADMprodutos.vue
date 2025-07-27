@@ -43,11 +43,24 @@
     <div class="produtos-header">
       <h3>Produtos</h3>
       <div class="filtro-categorias">
-        <label for="filtroCategoria" style="margin-right: 6px; font-size: 1rem;">Filtrar por categoria:</label>
-        <select id="filtroCategoria" v-model="categoriaSelecionada">
-          <option value="">Todas</option>
-          <option v-for="cat in categorias" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-        </select>
+        <div class="filtro-estoque">
+          <label for="filtroEstoque" style="margin-right: 6px; font-size: 1rem;">Estoque:</label>
+          <select id="filtroEstoque" v-model="estoqueSelecionado">
+            <option value="">Indefinido</option>
+            <option value="0">0</option>
+            <option value="10-30">10-30</option>
+            <option value="30-50">30-50</option>
+            <option value="50-100">50-100</option>
+            <option value="100+">100 ou mais</option>
+          </select>
+        </div>
+        <div class="filtro-categoria">
+          <label for="filtroCategoria" style="margin-right: 6px; font-size: 1rem;">Filtrar por categoria:</label>
+          <select id="filtroCategoria" v-model="categoriaSelecionada">
+            <option value="">Todas</option>
+            <option v-for="cat in categorias" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
         <button class="novo-produto-btn" @click="abrirCriacao">Novo produto</button>
       </div>
     </div>
@@ -64,7 +77,7 @@
           </div>
           <div class="BTli">
             <button @click="editarProduto(produto)">Editar</button>
-            <button class="excluir-btn" @click="excluirProduto(produto.id)">Excluir</button>
+            <button class="excluir-btn" @click="abrirModalExclusao(produto.id)">Excluir</button>
           </div>
           <span style="font-size:12px;color:#555;">Estoque: {{ produto.stock }}</span>
         </li>
@@ -72,16 +85,32 @@
     </div>
     </div>
   </div>
+  
+  <!-- Modal de Confirmação -->
+  <div v-if="mostrarModalConfirmacao" class="modal-overlay">
+      <div class="modal-confirmacao">
+          <h3>Confirmar Exclusão</h3>
+          <p>Tem certeza que deseja excluir este produto?</p>
+          <div class="modal-botoes">
+              <button @click="confirmarExclusao" class="btn-confirmar">Confirmar</button>
+              <button @click="fecharModalConfirmacao" class="btn-cancelar">Cancelar</button>
+          </div>
+      </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
+import { useToast } from 'vue-toastification'
 import api from '../services/api'
 
 const imagem = ref(null)
 const categorias = ref([])
 const mensagem = ref('')
+const toast = useToast()
 const mostraFormulario = ref(false)
+const mostrarModalConfirmacao = ref(false)
+const produtoParaExcluir = ref(null)
 
 // Edição
 const editando = ref(false)
@@ -102,10 +131,40 @@ const categoriaIdForm = ref('')
 const imagemForm = ref(null)
 
 const categoriaSelecionada = ref('')
+const estoqueSelecionado = ref('')
 
 const produtosFiltrados = computed(() => {
-  if (!categoriaSelecionada.value) return produtos.value
-  return produtos.value.filter(produto => String(produto.category_id) === String(categoriaSelecionada.value))
+  let produtosFiltrados = produtos.value
+
+  // Filtro por categoria
+  if (categoriaSelecionada.value) {
+    produtosFiltrados = produtosFiltrados.filter(produto => 
+      String(produto.category_id) === String(categoriaSelecionada.value)
+    )
+  }
+
+  // Filtro por estoque
+  if (estoqueSelecionado.value) {
+    produtosFiltrados = produtosFiltrados.filter(produto => {
+      const estoque = produto.stock
+      switch (estoqueSelecionado.value) {
+        case '0':
+          return estoque === 0
+        case '10-30':
+          return estoque >= 10 && estoque <= 30
+        case '30-50':
+          return estoque >= 30 && estoque <= 50
+        case '50-100':
+          return estoque >= 50 && estoque <= 100
+        case '100+':
+          return estoque >= 100
+        default:
+          return true
+      }
+    })
+  }
+
+  return produtosFiltrados
 })
 
 const produtos = ref([])
@@ -183,11 +242,11 @@ async function criarProduto() {
     await api.post('/products/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
-    mensagem.value = 'Produto criado com sucesso!'
+    toast.success('Produto criado com sucesso!')
     await carregarProdutos()
     fecharFormulario()
   } catch (e) {
-    mensagem.value = 'Erro ao criar produto.'
+    toast.error('Erro ao criar produto.')
   }
 }
 
@@ -248,24 +307,34 @@ async function atualizarProduto() {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
     }
-    mensagemEdicao.value = 'Produto atualizado com sucesso!'
+    toast.success('Produto atualizado com sucesso!')
     await carregarProdutos()
     cancelarEdicao()
   } catch (e) {
-    mensagemEdicao.value = 'Erro ao atualizar produto.'
+    toast.error('Erro ao atualizar produto.')
   }
 }
 
-async function excluirProduto(id) {
-  if (confirm('Tem certeza que deseja excluir este produto?')) {
-    try {
-      await api.delete(`/products/${id}`)
-      mensagem.value = 'Produto excluído com sucesso!'
-      await carregarProdutos()
-    } catch (e) {
-      mensagem.value = 'Erro ao excluir produto.'
-    }
+function abrirModalExclusao(id) {
+  produtoParaExcluir.value = id
+  mostrarModalConfirmacao.value = true
+}
+
+async function confirmarExclusao() {
+  try {
+    await api.delete(`/products/${produtoParaExcluir.value}`)
+    toast.success('Produto excluído com sucesso!')
+    await carregarProdutos()
+    fecharModalConfirmacao()
+  } catch (e) {
+    toast.error('Erro ao excluir produto.')
+    fecharModalConfirmacao()
   }
+}
+
+function fecharModalConfirmacao() {
+  mostrarModalConfirmacao.value = false
+  produtoParaExcluir.value = null
 }
 
 async function carregarProdutos() {
@@ -650,17 +719,36 @@ li {
   gap: 12px;
 }
 
+.filtro-estoque,
+.filtro-categoria {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 @media (max-width: 768px) {
   .filtro-categorias {
     flex-direction: column;
     align-items: stretch;
     gap: 6px;
   }
+  
+  .filtro-estoque,
+  .filtro-categoria {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
 }
 
 @media (max-width: 480px) {
   .filtro-categorias {
     gap: 4px;
+  }
+  
+  .filtro-estoque,
+  .filtro-categoria {
+    gap: 2px;
   }
 }
 
@@ -843,6 +931,95 @@ li {
     font-size: 0.75rem;
     margin-left: 3px;
   }
+}
+
+/* Modal de Confirmação */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-confirmacao {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.modal-confirmacao h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.modal-confirmacao p {
+    margin: 0 0 25px 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+.modal-botoes {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-confirmar {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-confirmar:hover {
+    background-color: #b71c1c;
+}
+
+.btn-cancelar {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-cancelar:hover {
+    background-color: #545b62;
+}
+
+@media (max-width: 480px) {
+    .modal-confirmacao {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .modal-botoes {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-confirmar,
+    .btn-cancelar {
+        padding: 12px 20px;
+    }
 }
 
 </style>

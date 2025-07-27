@@ -133,11 +133,13 @@
 import { ref, computed, onMounted } from 'vue'
 import api, { buscarProdutosAdmin228 } from '../services/api'
 import { useRouter, useRoute } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import DISPONIVELREAL from './img/DISPONIVELREAL.png'
 import INDISPONIVELREAL from './img/INDISPONIVELREAL.png'
 import { getCategoriasPorUsuario228 } from '../services/api'
 
 const apiBase = 'http://35.196.79.227:8000'
+const toast = useToast()
 // Função para checar se o usuário ta logado (token em memória)
 const isLoggedIn = computed(() => !!api.defaults.headers.common['Authorization'])
 const showDropdown = ref(false)

@@ -133,6 +133,7 @@ async function criarModerador() {
     padding: 0;
     box-sizing: border-box;
     width: 100%;
+    height: 100%;
     min-width: 0;
     overflow-x: hidden;
 }
@@ -174,9 +175,9 @@ async function criarModerador() {
 
 .tituloformulario {
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    padding: 40px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.116);
+    border-radius: 5px;
+    padding: 50px;
     min-width: 0;
     max-width: 500px;
     width: 100%;

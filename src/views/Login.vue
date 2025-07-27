@@ -45,10 +45,12 @@
 
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import logoImg from '../components/img/LOGOMANYA-Photoroom.png'
 import { login, register } from '../services/api'
 
 const logo = logoImg
+const toast = useToast()
 const showRegister = ref(false)
 
 const email = ref('')
@@ -69,9 +71,10 @@ async function handleLogin() {
   loading.value = true
   try {
     await login(email.value, password.value)
+    toast.success('Login realizado com sucesso!')
     router.push('/')
   } catch (err) {
-    error.value = err.response?.data?.detail || 'Erro ao fazer login.'
+    toast.error(err.response?.data?.detail || 'Erro ao fazer login.')
   } finally {
     loading.value = false
   }
@@ -83,13 +86,13 @@ async function handleRegister() {
   loading.value = true
   try {
     await register(registerName.value, registerEmail.value, registerPassword.value)
-    registerSuccess.value = 'Cadastro realizado com sucesso! Faça login.'
+    toast.success('Cadastro realizado com sucesso! Faça login.')
     registerName.value = ''
     registerEmail.value = ''
     registerPassword.value = ''
     showRegister.value = false
   } catch (err) {
-    registerError.value = err.response?.data?.detail || 'Erro ao cadastrar.'
+    toast.error(err.response?.data?.detail || 'Erro ao cadastrar.')
   } finally {
     loading.value = false
   }
