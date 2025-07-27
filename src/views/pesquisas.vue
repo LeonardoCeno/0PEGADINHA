@@ -119,9 +119,13 @@
                         <p>R$ {{ produto.price }}</p>
                     </div>
                     <div class="add">
-                        <button>
+                        <button v-if="!produtoEstaNoCarrinho(produto.id)" @click="adicionarAoCarrinho(produto)">
                             <img src="../components/img/maisumcarrinho.png" alt="">
                             <p>Adicionar</p>
+                        </button>
+                        <button v-else @click="removerDoCarrinho(produto)" class="remover-btn">
+                            <img src="../components/img/maisumcarrinho.png" alt="">
+                            <p>Remover</p>
                         </button>
                         <img src="../components/img/coraçaofav.png" alt="">
                     </div>
@@ -136,9 +140,13 @@
                         <h4>{{ produto.name }}</h4>
                         <p>R$ {{ produto.price }}</p>
                         <div class="add2" >
-                        <button>
+                        <button v-if="!produtoEstaNoCarrinho(produto.id)" @click="adicionarAoCarrinho(produto)">
                             <img src="../components/img/maisumcarrinho.png" alt="">
                             <p>Adicionar</p>
+                        </button>
+                        <button v-else @click="removerDoCarrinho(produto)" class="remover-btn">
+                            <img src="../components/img/maisumcarrinho.png" alt="">
+                            <p>Remover</p>
                         </button>
                         <img src="../components/img/coraçaofav.png" alt="">
                         </div>
@@ -160,7 +168,8 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Header from '../components/Headercomponent.vue'
 import Footer from '../components/Footercomponent.vue'
-import api from '../services/api'
+import api, { adicionarItemCarrinho, removerItemCarrinho, getItensCarrinho } from '../services/api'
+import { useToast } from 'vue-toastification'
 import DISPONIVELREAL from '../components/img/DISPONIVELREAL.png'
 import INDISPONIVELREAL from '../components/img/INDISPONIVELREAL.png'
 import { getCategoriasPorUsuario228 } from '../services/api'
@@ -175,6 +184,27 @@ const produtos = ref([])
 const produtosFiltrados = ref([])
 const carregando = ref(false)
 const erro = ref('')
+const toast = useToast()
+
+// Verificar se o usuário está logado
+const isLoggedIn = computed(() => {
+    const token = localStorage.getItem('token')
+    return !!token && !!api.defaults.headers.common['Authorization']
+})
+
+// Carrinho
+const itensCarrinho = ref([])
+
+// Função para verificar se um produto está no carrinho
+const produtoEstaNoCarrinho = (produtoId) => {
+    return itensCarrinho.value.some(item => item.product_id === produtoId)
+}
+
+// Função para obter quantidade de um produto no carrinho
+const getQuantidadeNoCarrinho = (produtoId) => {
+    const item = itensCarrinho.value.find(item => item.product_id === produtoId)
+    return item ? item.quantity : 0
+}
 const route = useRoute()
 const termoBusca = ref('')
 const isLancamentos = ref(false)
@@ -350,6 +380,11 @@ onMounted(async () => {
     isLancamentos.value = !!route.query.lancamentos
     await buscarCategorias()
     await buscarProdutos()
+    
+    // Carregar carrinho se usuário estiver logado
+    if (isLoggedIn.value) {
+        await carregarCarrinho()
+    }
 })
 
 // Watch q reage a mudanças na URL (termo, categoriaId, lancamentos etc)
@@ -371,6 +406,69 @@ watch(categoriasSelecionadas, filtrarProdutos, { deep: true })
 
 // Reage a mudanças de preço/ordem
 watch([precoSelecionado, ordemSelecionada, ordenarPorMaisRecentes], filtrarProdutos)
+
+// Função para carregar carrinho
+async function carregarCarrinho() {
+    if (!isLoggedIn.value) return
+    
+    try {
+        const dadosCarrinho = await getItensCarrinho()
+        itensCarrinho.value = dadosCarrinho.items || []
+    } catch (error) {
+        console.error('Erro ao carregar carrinho:', error)
+        itensCarrinho.value = []
+    }
+}
+
+// Função para adicionar produto ao carrinho
+async function adicionarAoCarrinho(produto) {
+    if (!isLoggedIn.value) {
+        toast.error('Faça login para adicionar produtos ao carrinho.')
+        return
+    }
+    
+    if (produto.stock < 1) {
+        toast.error('Produto indisponível no momento.')
+        return
+    }
+    
+    // Verificar se produto já está no carrinho
+    if (produtoEstaNoCarrinho(produto.id)) {
+        toast.error('Produto já está no carrinho.')
+        return
+    }
+    
+    try {
+        // Primeiro, garantir que o carrinho existe
+        try {
+            await api.post('/cart/')
+        } catch (cartError) {
+            // Carrinho já existe
+        }
+        
+        // Converter preço para número se for string
+        const precoUnitario = typeof produto.price === 'string' ? parseFloat(produto.price) : produto.price
+        
+        await adicionarItemCarrinho(produto.id, 1, precoUnitario)
+        toast.success('Produto adicionado ao carrinho!')
+        await carregarCarrinho() // Recarregar carrinho
+    } catch (error) {
+        console.error('Erro ao adicionar produto:', error)
+        toast.error('Erro ao adicionar produto ao carrinho.')
+    }
+}
+
+// Função para remover produto do carrinho
+async function removerDoCarrinho(produto) {
+    try {
+        await removerItemCarrinho(produto.id)
+        toast.success('Produto removido do carrinho!')
+        await carregarCarrinho() // Recarregar carrinho
+    } catch (error) {
+        console.error('Erro ao remover produto:', error)
+        toast.error('Erro ao remover produto do carrinho.')
+    }
+}
 
 </script>
 
@@ -440,6 +538,8 @@ watch([precoSelecionado, ordemSelecionada, ordenarPorMaisRecentes], filtrarProdu
 .nome-preco-imagem2 .aolado button:hover {
     opacity: 0.8;
 }
+
+
 
 .lista-pesquisa2 {
     display: flex;
@@ -781,6 +881,8 @@ watch([precoSelecionado, ordemSelecionada, ordenarPorMaisRecentes], filtrarProdu
 .add button:hover {
     background-color: #02060ade;
 }
+
+
 .add button p {
     color: white;
 }

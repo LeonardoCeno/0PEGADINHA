@@ -79,6 +79,54 @@ export async function getCategoriasPorUsuario228() {
   return response.data
 }
 
+// CARRINHO
+export async function getCarrinho() {
+  const response = await api.get('/cart/')
+  return response.data
+}
+
+export async function getItensCarrinho() {
+  const response = await api.get('/cart/items')
+  return response.data
+}
+
+export async function adicionarItemCarrinho(produtoId, quantidade, precoUnitario) {
+  console.log('API: Enviando para /cart/items:', {
+    product_id: produtoId,
+    quantity: quantidade,
+    unit_price: precoUnitario
+  })
+  
+  const response = await api.post('/cart/items', {
+    product_id: produtoId,
+    quantity: quantidade,
+    unit_price: precoUnitario
+  })
+  
+  console.log('API: Resposta recebida:', response.data)
+  return response.data
+}
+
+export async function atualizarQuantidadeCarrinho(produtoId, quantidade) {
+  const response = await api.put('/cart/items', {
+    product_id: produtoId,
+    quantity: quantidade
+  })
+  return response.data
+}
+
+export async function removerItemCarrinho(produtoId) {
+  const response = await api.delete('/cart/items', {
+    data: { product_id: produtoId }
+  })
+  return response.data
+}
+
+export async function limparCarrinho() {
+  const response = await api.delete('/cart/clear')
+  return response.data
+}
+
 // moderadores
 export async function criarModerador(dados) {
   const response = await api.post('/users/create-moderator', dados)

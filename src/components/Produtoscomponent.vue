@@ -22,7 +22,14 @@
         <p>R$ {{ produto.price }}</p>
         </div>
         <div class="add">
-        <button><img src="./img/maisumcarrinho.png" alt=""><p>Adicionar</p></button>
+        <button v-if="!produtoEstaNoCarrinho(produto.id)" @click="adicionarAoCarrinho(produto)">
+            <img src="./img/maisumcarrinho.png" alt="">
+            <p>Adicionar</p>
+        </button>
+        <button v-else @click="removerDoCarrinho(produto)" class="remover-btn">
+            <img src="./img/maisumcarrinho.png" alt="">
+            <p>Remover</p>
+        </button>
         <img src="./img/coraçaofav.png" alt="">
         </div>
     </div>
@@ -54,7 +61,14 @@
         <p>R$ {{ produto.price }}</p>
         </div>
         <div class="add" >
-        <button><img src="./img/maisumcarrinho.png" alt=""><p>Adicionar</p></button>
+        <button v-if="!produtoEstaNoCarrinho(produto.id)" @click="adicionarAoCarrinho(produto)">
+            <img src="./img/maisumcarrinho.png" alt="">
+            <p>Adicionar</p>
+        </button>
+        <button v-else @click="removerDoCarrinho(produto)" class="remover-btn">
+            <img src="./img/maisumcarrinho.png" alt="">
+            <p>Remover</p>
+        </button>
         <img src="./img/coraçaofav.png" alt="">
         </div>
     </div>
@@ -71,7 +85,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import api from '../services/api'
+import api, { adicionarItemCarrinho, removerItemCarrinho, getItensCarrinho } from '../services/api'
+import { useToast } from 'vue-toastification'
 
 import DISPONIVELREAL from './img/DISPONIVELREAL.png'
 import INDISPONIVELREAL from './img/INDISPONIVELREAL.png'
@@ -84,6 +99,27 @@ const mostrarQuantidadeObras = ref(10)
 const mostrarQuantidadeOfertas = ref(10)
 const estadoBotaoObras = ref('mais') // 'mais' ou 'menos'
 const estadoBotaoOfertas = ref('mais')
+const toast = useToast()
+
+// Verificar se o usuário está logado
+const isLoggedIn = computed(() => {
+    const token = localStorage.getItem('token')
+    return !!token && !!api.defaults.headers.common['Authorization']
+})
+
+// Carrinho
+const itensCarrinho = ref([])
+
+// Função para verificar se um produto está no carrinho
+const produtoEstaNoCarrinho = (produtoId) => {
+    return itensCarrinho.value.some(item => item.product_id === produtoId)
+}
+
+// Função para obter quantidade de um produto no carrinho
+const getQuantidadeNoCarrinho = (produtoId) => {
+    const item = itensCarrinho.value.find(item => item.product_id === produtoId)
+    return item ? item.quantity : 0
+}
 
 onMounted(async () => {
     try {
@@ -94,6 +130,11 @@ onMounted(async () => {
                 ? apiBase + produto.image_path
                 : produto.image_path
         }))
+        
+        // Carregar carrinho se usuário estiver logado
+        if (isLoggedIn.value) {
+            await carregarCarrinho()
+        }
     } catch (e) {
         erro.value = 'Erro ao carregar produtos'
     } finally {
@@ -130,6 +171,69 @@ function alternarOfertas() {
         if (mostrarQuantidadeOfertas.value === 10) {
             estadoBotaoOfertas.value = 'mais'
         }
+    }
+}
+
+// Função para carregar carrinho
+async function carregarCarrinho() {
+    if (!isLoggedIn.value) return
+    
+    try {
+        const dadosCarrinho = await getItensCarrinho()
+        itensCarrinho.value = dadosCarrinho.items || []
+    } catch (error) {
+        console.error('Erro ao carregar carrinho:', error)
+        itensCarrinho.value = []
+    }
+}
+
+// Função para adicionar produto ao carrinho
+async function adicionarAoCarrinho(produto) {
+    if (!isLoggedIn.value) {
+        toast.error('Faça login para adicionar produtos ao carrinho.')
+        return
+    }
+    
+    if (produto.stock < 1) {
+        toast.error('Produto indisponível no momento.')
+        return
+    }
+    
+    // Verificar se produto já está no carrinho
+    if (produtoEstaNoCarrinho(produto.id)) {
+        toast.error('Produto já está no carrinho.')
+        return
+    }
+    
+    try {
+        // Primeiro, garantir que o carrinho existe
+        try {
+            await api.post('/cart/')
+        } catch (cartError) {
+            // Carrinho já existe
+        }
+        
+        // Converter preço para número se for string
+        const precoUnitario = typeof produto.price === 'string' ? parseFloat(produto.price) : produto.price
+        
+        await adicionarItemCarrinho(produto.id, 1, precoUnitario)
+        toast.success('Produto adicionado ao carrinho!')
+        await carregarCarrinho() // Recarregar carrinho
+    } catch (error) {
+        console.error('Erro ao adicionar produto:', error)
+        toast.error('Erro ao adicionar produto ao carrinho.')
+    }
+}
+
+// Função para remover produto do carrinho
+async function removerDoCarrinho(produto) {
+    try {
+        await removerItemCarrinho(produto.id)
+        toast.success('Produto removido do carrinho!')
+        await carregarCarrinho() // Recarregar carrinho
+    } catch (error) {
+        console.error('Erro ao remover produto:', error)
+        toast.error('Erro ao remover produto do carrinho.')
     }
 }
 
@@ -258,6 +362,8 @@ function alternarOfertas() {
 .add button:hover {
     background-color: #02060ac2;
 }
+
+
 
 .add button p {
     color: white;

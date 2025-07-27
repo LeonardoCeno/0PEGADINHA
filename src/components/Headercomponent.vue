@@ -33,10 +33,61 @@
             </div>
         </div>
         <div class="botoes desktop">
-            <button>
-            <p>Carrinho</p>
-            <img src="../components/img/carrinhofinal.png" alt="" />
-            </button>
+            <div class="carrinho-dropdown-wrapper" style="position: relative; display: inline-block;">
+                <button @click.stop="toggleCarrinhoDropdown">
+                    <p>Carrinho</p>
+                    <img src="../components/img/carrinhofinal.png" alt="" />
+                    <span v-if="totalItensCarrinho > 0" class="carrinho-badge">{{ totalItensCarrinho }}</span>
+                </button>
+                <div v-if="showCarrinhoDropdown" class="carrinho-dropdown-menu" @click.stop>
+                    <div class="carrinho-header">
+                        <h4>Seu Carrinho</h4>
+                        <span v-if="totalItensCarrinho > 0" class="carrinho-total">{{ totalItensCarrinho }} item{{ totalItensCarrinho > 1 ? 's' : '' }}</span>
+                    </div>
+                    
+                    <div v-if="carregandoCarrinho" class="carrinho-carregando">
+                        <p>Carregando...</p>
+                    </div>
+                    
+                    <div v-else-if="!itensCarrinho || itensCarrinho.length === 0" class="carrinho-vazio">
+                        <img src="../components/img/carrinhofinal.png" alt="Carrinho vazio" />
+                        <p>Seu carrinho está vazio</p>
+                        <span>Adicione produtos para começar</span>
+                    </div>
+                    
+                    <div v-else class="carrinho-itens">
+                        <div v-for="item in itensCarrinho.slice(0, 3)" :key="item.id" class="carrinho-item">
+                            <img v-if="item.image_path" :src="item.image_path.startsWith('http') ? item.image_path : apiBase + item.image_path" alt="Produto" />
+                            <div class="carrinho-item-info">
+                                <span class="carrinho-item-nome">{{ item.name }}</span>
+                                <span class="carrinho-item-preco">R$ {{ item.unit_price }}</span>
+                                <div class="carrinho-item-quantidade">
+                                    <button @click="diminuirQuantidade(item.product_id)" class="quantidade-btn">-</button>
+                                    <span>{{ item.quantity }}</span>
+                                    <button @click="aumentarQuantidade(item.product_id)" class="quantidade-btn">+</button>
+                                </div>
+                            </div>
+                            <button @click="removerItemCarrinhoLocal(item.product_id)" class="carrinho-remover">
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div v-if="itensCarrinho.length > 3" class="carrinho-mais-itens">
+                            <span>+{{ itensCarrinho.length - 3 }} mais</span>
+                        </div>
+                        
+                        <div class="carrinho-footer">
+                            <div class="carrinho-total-preco">
+                                <span>Total: R$ {{ totalPrecoCarrinho }}</span>
+                            </div>
+                            <div class="carrinho-botoes">
+                                <button @click="verCarrinhoCompleto" class="btn-ver-carrinho">Ver Carrinho</button>
+                                <button @click="finalizarCompra" class="btn-finalizar">Finalizar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <button>
                 <p>Pedidos</p>
                 <img src="../components/img/listafinal.png" alt="" />
@@ -83,10 +134,61 @@
                 <p>Pedidos</p>
                 <img src="../components/img/listafinal.png" alt="" />
                 </button>
-                <button>
-                <p>Carrinho</p>
-                <img src="../components/img/carrinhofinal.png" alt="" />
-                </button>
+                <div class="carrinho-dropdown-wrapper" style="position: relative; display: inline-block;">
+                    <button @click.stop="toggleCarrinhoDropdown">
+                        <p>Carrinho</p>
+                        <img src="../components/img/carrinhofinal.png" alt="" />
+                        <span v-if="totalItensCarrinho > 0" class="carrinho-badge">{{ totalItensCarrinho }}</span>
+                    </button>
+                    <div v-if="showCarrinhoDropdown" class="carrinho-dropdown-menu mobile" @click.stop>
+                        <div class="carrinho-header">
+                            <h4>Seu Carrinho</h4>
+                            <span v-if="totalItensCarrinho > 0" class="carrinho-total">{{ totalItensCarrinho }} item{{ totalItensCarrinho > 1 ? 's' : '' }}</span>
+                        </div>
+                        
+                        <div v-if="carregandoCarrinho" class="carrinho-carregando">
+                            <p>Carregando...</p>
+                        </div>
+                        
+                        <div v-else-if="!itensCarrinho || itensCarrinho.length === 0" class="carrinho-vazio">
+                            <img src="../components/img/carrinhofinal.png" alt="Carrinho vazio" />
+                            <p>Seu carrinho está vazio</p>
+                            <span>Adicione produtos para começar</span>
+                        </div>
+                        
+                        <div v-else class="carrinho-itens">
+                            <div v-for="item in itensCarrinho.slice(0, 3)" :key="item.id" class="carrinho-item">
+                                <img v-if="item.image_path" :src="item.image_path.startsWith('http') ? item.image_path : apiBase + item.image_path" alt="Produto" />
+                                <div class="carrinho-item-info">
+                                    <span class="carrinho-item-nome">{{ item.name }}</span>
+                                    <span class="carrinho-item-preco">R$ {{ item.unit_price }}</span>
+                                    <div class="carrinho-item-quantidade">
+                                        <button @click="diminuirQuantidade(item.product_id)" class="quantidade-btn">-</button>
+                                        <span>{{ item.quantity }}</span>
+                                        <button @click="aumentarQuantidade(item.product_id)" class="quantidade-btn">+</button>
+                                    </div>
+                                </div>
+                                <button @click="removerItemCarrinhoLocal(item.product_id)" class="carrinho-remover">
+                                    ×
+                                </button>
+                            </div>
+                            
+                            <div v-if="itensCarrinho.length > 3" class="carrinho-mais-itens">
+                                <span>+{{ itensCarrinho.length - 3 }} mais</span>
+                            </div>
+                            
+                            <div class="carrinho-footer">
+                                <div class="carrinho-total-preco">
+                                    <span>Total: R$ {{ totalPrecoCarrinho }}</span>
+                                </div>
+                                <div class="carrinho-botoes">
+                                    <button @click="verCarrinhoCompleto" class="btn-ver-carrinho">Ver Carrinho</button>
+                                    <button @click="finalizarCompra" class="btn-finalizar">Finalizar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="input mobile" style="position:relative;">
@@ -130,8 +232,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import api, { buscarProdutosAdmin228 } from '../services/api'
+import { ref, computed, onMounted, watch } from 'vue'
+import api, { buscarProdutosAdmin228, getItensCarrinho, removerItemCarrinho, atualizarQuantidadeCarrinho } from '../services/api'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import DISPONIVELREAL from './img/DISPONIVELREAL.png'
@@ -144,9 +246,27 @@ const toast = useToast()
 const isLoggedIn = computed(() => !!api.defaults.headers.common['Authorization'])
 const showDropdown = ref(false)
 const showCategoriasDropdown = ref(false)
+const showCarrinhoDropdown = ref(false)
 const router = useRouter()
 const route = useRoute()
 const categorias = ref([])
+
+// Carrinho
+const itensCarrinho = ref([])
+const carregandoCarrinho = ref(false)
+
+const totalItensCarrinho = computed(() => {
+  return itensCarrinho.value.reduce((total, item) => total + item.quantity, 0)
+})
+
+const totalPrecoCarrinho = computed(() => {
+  return itensCarrinho.value.reduce((total, item) => total + (item.unit_price * item.quantity), 0).toFixed(2)
+})
+
+// Função para verificar se um produto está no carrinho
+const produtoEstaNoCarrinho = (produtoId) => {
+  return itensCarrinho.value.some(item => item.product_id === produtoId)
+}
 
 // isso carrega as categorias criadas para que atualize o "categorias" do header automaticamente ao o admin criar um nova
 async function carregarCategorias() {
@@ -159,6 +279,34 @@ async function carregarCategorias() {
 
 onMounted(() => {
     carregarCategorias()
+    if (isLoggedIn.value) {
+        carregarCarrinho()
+    }
+})
+
+// Watcher para recarregar carrinho quando o usuário fizer login
+watch(isLoggedIn, (novoValor) => {
+    if (novoValor) {
+        carregarCarrinho()
+    } else {
+        itensCarrinho.value = []
+    }
+})
+
+// Event listener para fechar carrinho ao clicar fora
+onMounted(() => {
+    document.addEventListener('click', (event) => {
+        const carrinhoWrapper = document.querySelector('.carrinho-dropdown-wrapper')
+        const carrinhoMenu = document.querySelector('.carrinho-dropdown-menu')
+        
+        if (showCarrinhoDropdown.value && 
+            carrinhoWrapper && 
+            !carrinhoWrapper.contains(event.target) &&
+            carrinhoMenu &&
+            !carrinhoMenu.contains(event.target)) {
+            showCarrinhoDropdown.value = false
+        }
+    })
 })
 
 // isso aqui é pra que se o usuario estiver no painel a parte das categorias abaixo do header não aparecer (sim, é uma soluçao pra nao ter que separar ele do header pq fiz os 2 junto num outro componente 👍)
@@ -274,6 +422,86 @@ function pesquisarEnter() {
         busca.value = ''
         mostrarSugestoes.value = false
     }
+}
+
+// Funções do Carrinho
+async function carregarCarrinho() {
+    if (!isLoggedIn.value) return
+    
+    try {
+        carregandoCarrinho.value = true
+        const dadosCarrinho = await getItensCarrinho()
+        itensCarrinho.value = dadosCarrinho.items || []
+    } catch (error) {
+        console.error('Erro ao carregar carrinho:', error)
+        itensCarrinho.value = []
+    } finally {
+        carregandoCarrinho.value = false
+    }
+}
+
+function toggleCarrinhoDropdown() {
+    if (!isLoggedIn.value) {
+        router.push('/login')
+        return
+    }
+    
+    showCarrinhoDropdown.value = !showCarrinhoDropdown.value
+    if (showCarrinhoDropdown.value && itensCarrinho.value.length === 0) {
+        carregarCarrinho()
+    }
+}
+
+async function removerItemCarrinhoLocal(produtoId) {
+    try {
+        await removerItemCarrinho(produtoId)
+        toast.success('Item removido do carrinho!')
+        await carregarCarrinho()
+    } catch (error) {
+        toast.error('Erro ao remover item do carrinho.')
+        console.error('Erro ao remover item:', error)
+    }
+}
+
+// Função para aumentar quantidade de um item no carrinho
+async function aumentarQuantidade(produtoId) {
+    try {
+        const item = itensCarrinho.value.find(item => item.product_id === produtoId)
+        if (item) {
+            await atualizarQuantidadeCarrinho(produtoId, item.quantity + 1)
+            await carregarCarrinho()
+        }
+    } catch (error) {
+        toast.error('Erro ao aumentar quantidade.')
+        console.error('Erro ao aumentar quantidade:', error)
+    }
+}
+
+// Função para diminuir quantidade de um item no carrinho
+async function diminuirQuantidade(produtoId) {
+    try {
+        const item = itensCarrinho.value.find(item => item.product_id === produtoId)
+        if (item && item.quantity > 1) {
+            await atualizarQuantidadeCarrinho(produtoId, item.quantity - 1)
+            await carregarCarrinho()
+        } else if (item && item.quantity === 1) {
+            // Se quantidade for 1, remove o item
+            await removerItemCarrinhoLocal(produtoId)
+        }
+    } catch (error) {
+        toast.error('Erro ao diminuir quantidade.')
+        console.error('Erro ao diminuir quantidade:', error)
+    }
+}
+
+function verCarrinhoCompleto() {
+    showCarrinhoDropdown.value = false
+    router.push('/carrinho')
+}
+
+function finalizarCompra() {
+    showCarrinhoDropdown.value = false
+    router.push('/carrinho')
 }
 
 </script>
@@ -720,6 +948,313 @@ button:hover img {
     transition: 0s;
     border-top: 0.5px solid grey;
     border-bottom: 0.5px solid grey;
+}
+
+/* Estilos do Carrinho */
+.carrinho-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.carrinho-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 18px;
+}
+
+.carrinho-dropdown-menu {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-width: 320px;
+    max-width: 400px;
+    max-height: 500px;
+    z-index: 1000;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.carrinho-dropdown-menu.mobile {
+    right: 10px;
+    min-width: 280px;
+    max-width: 320px;
+    max-height: 450px;
+}
+
+.carrinho-header {
+    background: #f8f9fa;
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.carrinho-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.carrinho-total {
+    font-size: 12px;
+    color: #666;
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.carrinho-carregando {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
+
+.carrinho-vazio {
+    padding: 24px 16px;
+    text-align: center;
+    color: #666;
+}
+
+.carrinho-vazio img {
+    width: 48px;
+    height: 48px;
+    opacity: 0.5;
+    margin-bottom: 12px;
+}
+
+.carrinho-vazio p {
+    margin: 8px 0 4px 0;
+    font-weight: 500;
+    color: #333;
+}
+
+.carrinho-vazio span {
+    font-size: 12px;
+    color: #999;
+}
+
+.carrinho-itens {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.carrinho-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f3f4;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.carrinho-item:hover {
+    background-color: #f8f9fa;
+}
+
+.carrinho-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.carrinho-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.carrinho-item-nome {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.3;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.carrinho-item-preco {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.carrinho-item-quantidade {
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quantidade-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #495057;
+    transition: all 0.2s;
+}
+
+.quantidade-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.quantidade-btn:active {
+    transform: scale(0.95);
+}
+
+.carrinho-remover {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    margin-left: 8px;
+}
+
+.carrinho-remover:hover {
+    background-color: #fdf2f2;
+}
+
+.carrinho-mais-itens {
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.carrinho-footer {
+    background: #f8f9fa;
+    padding: 16px;
+    border-top: 1px solid #e9ecef;
+}
+
+.carrinho-total-preco {
+    margin-bottom: 12px;
+    text-align: right;
+}
+
+.carrinho-total-preco span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.carrinho-botoes {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-ver-carrinho,
+.btn-finalizar {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-ver-carrinho {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.btn-ver-carrinho:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-finalizar {
+    background: #2c3e50;
+    color: white;
+}
+
+.btn-finalizar:hover {
+    background: #34495e;
+}
+
+/* Responsividade do carrinho */
+@media (max-width: 768px) {
+    .carrinho-dropdown-menu {
+        right: 10px;
+        min-width: 260px;
+        max-width: calc(100vw - 20px);
+    }
+    
+    .carrinho-item-nome {
+        max-width: 140px;
+    }
+    
+    .carrinho-botoes {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .carrinho-dropdown-menu {
+        right: 5px;
+        left: 5px;
+        min-width: auto;
+        max-width: none;
+        width: calc(100vw - 10px);
+    }
+    
+    .carrinho-item-nome {
+        max-width: 120px;
+    }
+    
+    .carrinho-header {
+        padding: 12px;
+    }
+    
+    .carrinho-item {
+        padding: 10px 12px;
+    }
+    
+    .carrinho-footer {
+        padding: 12px;
+    }
 }
 
 .autocomplete-sugestoes {
